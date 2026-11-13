@@ -1,1 +1,1 @@
-# b-t-ns-r-mler
+BU DOSYALARI İSTEDİĞİNİZ GİBİ DÜZENLEYEBİLİRSİNİZ
