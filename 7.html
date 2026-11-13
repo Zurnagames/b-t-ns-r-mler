@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İskender Simulator Pro - ZurnaGames Sürüm</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+        #oyun-alani {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 850px;
+            position: relative;
+        }
+
+        #ust-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .rozet {
+            background-color: #334155;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        #gorev-kutusu {
+            background-color: #1e293b;
+            border: 2px solid #eab308;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        #sabir-kapsayici {
+            width: 100%;
+            background-color: #334155;
+            border-radius: 6px;
+            height: 16px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #sabir-bari {
+            width: 100%;
+            height: 100%;
+            background-color: #22c55e;
+            transition: width 1s linear, background-color 0.5s;
+        }
+
+        #sabir-yazi {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 16px;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #canvas-kapsayici {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 1;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            border-radius: 8px;
+            display: block;
+            background-color: #000;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.96);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 15px;
+        }
+
+        .giris-kutusu {
+            background-color: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            text-align: center;
+            width: 100%;
+            max-width: 440px;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .giris-kutusu h2 { margin-top: 0; color: #facc15; font-size: 18px; }
+        .giris-kutusu input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 14px;
+        }
+
+        #stok-paneli {
+            background-color: #334155;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        #tezgah {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            border: none;
+            padding: 10px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            user-select: none;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-mod { background-color: #6366f1; color: white; margin-bottom: 8px; width: 100%; }
+        .btn-yon { background-color: #3b82f6; color: white; }
+        .btn-depo { background-color: #a855f7; color: white; grid-column: span 2; }
+        .btn-cirak { background-color: #ec4899; color: white; }
+        .btn-gelistir { background-color: #f59e0b; color: white; }
+        .btn-kaydet { background-color: #06b6d4; color: white; }
+        .btn-duraklat { background-color: #ef4444; color: white; }
+        .btn-sifirla { background-color: #f97316; color: white; }
+        .btn-basla { background-color: #22c55e; color: white; width: 100%; padding: 12px; margin-top: 10px; }
+        .btn-menu { background-color: #8b5cf6; color: white; }
+        .btn-muzik { background-color: #ec4899; color: white; }
+
+        #durum {
+            grid-column: 1 / -1;
+            margin-top: 5px;
+            background-color: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            color: #38bdf8;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .menu-liste {
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .tutorial-step {
+            display: none;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .tutorial-step.active {
+            display: block;
+        }
+        .step-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #475569;
+        }
+        .dot.active {
+            background-color: #22c55e;
+        }
+
+        @media (max-width: 600px) {
+            button { padding: 10px 4px; font-size: 10px; }
+            #ust-bar { font-size: 11px; }
+            #gorev-kutusu { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="bgm-player" loop>
+    <source src="https://www.mureka.ai/song-detail/9B7Q7NwsBFcax1pjxrRrdy?is_from_share=1" type="audio/mpeg">
+    Tarayıcınız ses elementini desteklemiyor.
+</audio>
+
+<div id="oyun-alani">
+    <div id="ust-bar">
+        <div class="rozet">👤 <span id="lbl-kullanici" style="color:#facc15;">Misafir</span></div>
+        <div class="rozet">📅 Gün: <span id="gun-deger" style="color:#facc15;">1</span> | ⏰ <span id="saat-deger" style="color:#38bdf8;">08:00</span></div>
+        <div class="rozet">⭐ Level: <span id="lvl-deger" style="color:#38bdf8;">1</span></div>
+        <div class="rozet">💰 <span id="kasa" style="color:#4ade80;">150</span> ₺</div>
+        <div>
+            <button class="btn-muzik" id="btn-muzik-kontrol" onclick="muzikAcKapat()">🔇 Müzik Kapalı</button>
+            <button class="btn-menu" onclick="menuAcKapat()">📜 Menü</button>
+            <button class="btn-kaydet" onclick="oyunuKaydet()">💾</button>
+            <button class="btn-sifirla" onclick="oyunuYenidenBaslat()">🔄</button>
+            <button class="btn-duraklat" onclick="oyunDuraklatAc()">⏸️</button>
+            <button style="background:#64748b; color:white;" onclick="tamEkranGec()">⛶</button>
+            <button style="background:#64748b; color:white;" onclick="cikisYap()">🚪</button>
+        </div>
+        <div class="rozet">Müşteri: <span id="m-sayi" style="color:#f43f5e;">1</span></div>
+    </div>
+
+    <div id="gorev-kutusu">
+        <div>🎯 <b>Görev:</b> <span id="gorev-tanim" style="color:#facc15;">3 Servis Yap</span> (<span id="gorev-ilerleme">0/3</span>)</div>
+        <div style="color:#4ade80; font-weight:bold;">+<span id="gorev-odul">100</span>₺</div>
+    </div>
+
+    <div id="sabir-kapsayici">
+        <div id="sabir-bari"></div>
+        <div id="sabir-yazi">Sabır: <span id="kalan-saniye">30</span> sn</div>
+    </div>
+
+    <div id="canvas-kapsayici">
+        <canvas id="oyunCanvas" width="800" height="400"></canvas>
+        
+        <div id="mod-overlay" class="overlay">
+            <div class="giris-kutusu">
+                <h2>🎮 ZurnaGames - Cihaz Tipi Seçin</h2>
+                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">En iyi deneyim için cihazınızı seçin:</p>
+                <button class="btn-mod" onclick="modSec('mobil')">📱 Mobil / Tablet</button>
+                <button class="btn-mod" style="background-color:#3b82f6;" onclick="modSec('masaustu')">💻 Masaüstü / Bilgisayar</button>
+            </div>
+        </div>
+
+        <div id="secim-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2>👤 ZurnaGames Hesap İşlemi</h2>
+                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Dükkanına devam etmek için ne yapmak istersin?</p>
+                <button class="btn-mod" style="background-color:#22c55e;" onclick="secimYonlendir('giris')">🔑 Giriş Yap</button>
+                <button class="btn-mod" style="background-color:#a855f7; margin-top:5px;" onclick="secimYonlendir('kayit')">📝 Kayıt Ol</button>
+            </div>
+        </div>
+
+        <div id="giris-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="form-baslik">🔑 Dükkan Girişi</h2>
+                <input type="text" id="txt-kullanici-adi" placeholder="Kullanıcı Adın">
+                <input type="password" id="txt-sifre" placeholder="Şifren">
+                <button class="btn-basla" id="btn-islem-yap" onclick="islemYap()">Giriş Yap</button>
+                <button class="btn-duraklat" style="width:100%; margin-top:8px;" onclick="geriDonSecim()">🔙 Geri Dön</button>
+            </div>
+        </div>
+
+        <div id="aksam-overlay" class="overlay" style="display: none; z-index: 60;">
+            <div class="giris-kutusu">
+                <h2 style="color:#facc15;">🌙 Akşam Oldu, Dükkan Kapanıyor!</h2>
+                <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 15px;">Yorucu bir gün bitti. Geceyi nasıl geçirmek istersin?</p>
+                <button class="btn-mod" style="background-color:#6366f1;" onclick="geceSecimYap('dukkan')">1️⃣ Dükkanda Kal (Kimse gelmez, dinlen)</button>
+                <button class="btn-mod" style="background-color:#3b82f6; margin-top:8px;" onclick="geceSecimYap('eve')">2️⃣ Eve Git ve Uyu (Sabaha dinç başla)</button>
+            </div>
+        </div>
+
+        <div id="vergi-overlay" class="overlay" style="display: none; z-index: 70;">
+            <div class="giris-kutusu">
+                <h2 style="color:#ef4444;">💸 Vergi Zamanı!</h2>
+                <p id="vergi-mesaj" style="font-size: 13px; color: #cbd5e1; margin-bottom: 15px; line-height: 1.5;"></p>
+                <button class="btn-basla" onclick="vergiOdeKapat()">Vergiyi Öde ve Güne Başla</button>
+            </div>
+        </div>
+
+        <div id="ogretici-overlay" class="overlay" style="display: none; z-index: 50;">
+            <div class="giris-kutusu">
+                <h2 style="color:#22c55e;">🎓 ZurnaGames Usta Rehberi</h2>
+                
+                <div class="step-indicators">
+                    <div class="dot active" id="dot-0"></div>
+                    <div class="dot" id="dot-1"></div>
+                    <div class="dot" id="dot-2"></div>
+                    <div class="dot" id="dot-3"></div>
+                    <div class="dot" id="dot-4"></div>
+                </div>
+
+                <div class="tutorial-step active" id="step-0">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b>Adım 1: Gün ve Pencere Sistemi</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">🌤️ 🪟 🌙</p>
+                    <p style="text-align: center;">Arkada yeni eklenen pencereden günün saatini takip edebilirsin. Akşam olunca seçim yapman gerekecek!</p>
+                </div>
+
+                <div class="tutorial-step" id="step-1">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b>Adım 2: Et Kesimi ve Servis</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">➡️ 🥩 ➡️</p>
+                    <p style="text-align: center;">Müşteri siparişi için pide hazırla, sağdan et kes, sosları ekle ve müşteriyi memnun et!</p>
+                </div>
+
+                <div class="tutorial-step" id="step-2">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b>Adım 3: Dükkan & Boya Geliştirme</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">⭐ 🎨 🪑</p>
+                    <p style="text-align: center;">Paranla dükkanın duvar boyasını değiştirebilir, masa seviyesini artırıp müşteri sabrını yükseltebilirsin.</p>
+                </div>
+
+                <div class="tutorial-step" id="step-3">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b>Adım 4: Vergi Kesen Devlet</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">💸 10 Günde 1</p>
+                    <p style="text-align: center;">Her 10 günde bir kazandığın paranın %25'i vergi olarak kesilecek. Kasanı hep dolu tut!</p>
+                </div>
+
+                <div class="tutorial-step" id="step-4">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b>Adım 5: Servis Zamanı</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">🔍 ➡️ ✅</p>
+                    <p style="text-align: center;">Tabağa tıklayarak detaylı ekrana geç, kontrol et ve servis et. Hazırsan dükkanı açıyoruz!</p>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-mod" id="btn-geri-adim" style="background-color: #475569; display:none;" onclick="adimDegistir(-1)">Geri</button>
+                    <button class="btn-basla" id="btn-ileri-adim" onclick="adimDegistir(1)" style="margin-top:0;">İleri ➡️</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2>📜 ZURNAGAMES DÜKKAN MENÜSÜ</h2>
+                <div class="menu-liste">
+                    <p>🍽️ <b>Porsiyon Türleri:</b></p>
+                    <p style="margin-left: 10px; font-size: 12px; color: #cbd5e1;">
+                        • 🤏 <b>Yarım:</b> 1 Parça Et<br>
+                        • 👤 <b>Normal:</b> 2-3 Parça Et<br>
+                        • 🦍 <b>Mega:</b> 4 Parça Et
+                    </p>
+                    <hr style="border-color:#334155;">
+                    <p>🫓 <b>Pide Tabanı:</b> 20 ₺</p>
+                    <p>🥩 <b>Et Döner (Parça):</b> 50 ₺</p>
+                    <p>🍅 <b>Salça Sos:</b> 20 ₺</p>
+                    <p>🧈 <b>Tereyağ:</b> 30 ₺</p>
+                    <p>🥛 <b>Yoğurt:</b> 20 ₺</p>
+                    <hr style="border-color:#334155;">
+                    <p>🥤 <b>Z-Cola / IcedTea:</b> 25 ₺</p>
+                    <p>🍾 <b>Z-Göz:</b> 20 ₺ | 🥛 <b>Ayran:</b> 15 ₺ | 🍷 <b>Şalgam:</b> 20 ₺</p>
+                    <hr style="border-color:#334155;">
+                    <p style="color:#facc15;">⭐ <b>10. Level Yan Lezzetler:</b></p>
+                    <p style="margin-left: 10px; font-size: 12px; color: #cbd5e1;">
+                        • 🥗 <b>Turşu:</b> 15 ₺ | 🍟 <b>Patates:</b> 35 ₺<br>
+                        • 🥞 <b>Baklava:</b> 50 ₺ | 🍮 <b>Künefe:</b> 60 ₺ | 🍮 <b>Kazandibi:</b> 45 ₺
+                    </p>
+                    <hr style="border-color:#334155;">
+                    <p style="color:#facc15;">♿ <b>Nadir Müşteri:</b> Tekerlekli sandalyeli müşteriler <b>2X Bahşiş</b> verir!</p>
+                </div>
+                <button class="btn-duraklat" style="width:100%; padding:10px; margin-top:10px;" onclick="menuAcKapat()">Kapat</button>
+            </div>
+        </div>
+
+        <div id="gelistir-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2>🏪 ZurnaGames Geliştirme & Mimarlık</h2>
+                <p style="font-size:12px; color:#94a3b8;">Dükkanını büyüterek ve arka duvar boyasını değiştirerek estetik kat!</p>
+                
+                <div style="text-align:left; font-size:13px; margin: 10px 0;">
+                    <p>🪑 <b>Masa Seviyesi:</b> <span id="lvl-masa">1</span> (+Sabır Süresi)</p>
+                    <button class="btn-mod" style="background:#f59e0b;" onclick="gelistir('masa')">Yükselt (<span id="fiyat-masa">200</span>₺)</button>
+                    
+                    <p style="margin-top:10px;">✨ <b>Dekorasyon:</b> <span id="lvl-dekor">1</span> (+Ekstra Bahşiş)</p>
+                    <button class="btn-mod" style="background:#f59e0b;" onclick="gelistir('dekor')">Yükselt (<span id="fiyat-dekor">150</span>₺)</button>
+
+                    <p style="margin-top:10px;">🎨 <b>Duvar Boyası Stili:</b> <span id="txt-boya" style="color:#facc15;">Klasik Taş (1. Seviye)</span></p>
+                    <button class="btn-mod" style="background:#06b6d4;" onclick="boyaDegistir()">Duvar Boyasını Değiştir (250₺)</button>
+                </div>
+
+                <button class="btn-duraklat" style="width:100%; padding:10px; margin-top:10px;" onclick="gelistirKapat()">Kapat</button>
+            </div>
+        </div>
+
+        <div id="ayarlar-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 style="color:#facc15;">⏸️ OYUN DURDURULDU</h2>
+                <button class="btn-basla" onclick="oyunDuraklatAc()">▶️ Devam Et</button>
+                <button class="btn-kaydet" style="width:100%; padding:12px; margin-top:8px;" onclick="oyunuKaydet()">💾 Kaydet</button>
+                <button class="btn-sifirla" style="width:100%; padding:12px; margin-top:8px;" onclick="oyunuYenidenBaslat()">🔄 Yeniden Başlat</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stok-paneli">
+        📦 <b>Depo:</b> 
+        Pide: <span id="stok-pide">5</span>/10 | 
+        Et: <span id="stok-et">5</span>/10 | 
+        Salça: <span id="stok-salca">3</span>/5 | 
+        Yağ: <span id="stok-tereyag">3</span>/5 | 
+        Yoğurt: <span id="stok-yogurt">3</span>/5 | 
+        Cola: <span id="stok-zcola">5</span>/5 | 
+        Tea: <span id="stok-zicetea">5</span>/5 | 
+        Göz: <span id="stok-zgoz">5</span>/5 | 
+        Ayran: <span id="stok-ayran">5</span>/5 | 
+        Şalgam: <span id="stok-salgam">5</span>/5<br>
+        <span id="yan-stok-bilgi" style="color:#facc15; display:none;">
+            🥗 Turşu: <span id="stok-tursu">3</span>/5 | 
+            🍟 Patates: <span id="stok-patates">3</span>/5 | 
+            🥞 Baklava: <span id="stok-baklava">3</span>/5 | 
+            🍮 Künefe: <span id="stok-kunefe">3</span>/5 | 
+            🍮 Kazan: <span id="stok-kazandibi">3</span>/5
+        </span>
+    </div>
+
+    <div id="tezgah">
+        <button class="btn-yon" onclick="don(-90)">↺ Sola Dön</button>
+        <button class="btn-yon" onclick="don(90)">↻ Sağa Dön</button>
+
+        <button class="btn-depo" onclick="depodanAl()">📦 Depoyu Doldur</button>
+        <button class="btn-cirak" onclick="cirakAl()">👨‍🍳 <span id="btn-cirak">Çırak (150₺)</span></button>
+        <button class="btn-gelistir" onclick="gelistirAc()">🛠️ ZurnaGames Geliştir</button>
+
+        <div id="durum">Hazırlanan Tabak: Boş | Tutar: 0 ₺ | 💡 Tabağa dokunarak tam ekran moduna geçebilirsin!</div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('oyunCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Müzik Kontrol Fonksiyonu
+    let muzikCalıyor = false;
+    function muzikAcKapat() {
+        const player = document.getElementById('bgm-player');
+        const btn = document.getElementById('btn-muzik-kontrol');
+        if (!muzikCalıyor) {
+            player.play().then(() => {
+                muzikCalıyor = true;
+                btn.textContent = "🎵 Müzik Açık";
+                btn.style.background = "#22c55e";
+            }).catch(e => {
+                alert("Müzik çalınamadı, tarayıcı engellemiş olabilir. Tekrar deneyin.");
+            });
+        } else {
+            player.pause();
+            muzikCalıyor = false;
+            btn.textContent = "🔇 Müzik Kapalı";
+            btn.style.background = "#ec4899";
+        }
+    }
+
+    let mevcutKullanici = null;
+    let oyunModu = 'masaustu';
+    let aktifIslemTuru = 'giris';
+    let ogreticiAdim = 0;
+
+    let kasa = 150; 
+    let musteriSayisi = 1;
+    let oyunLevel = 1;
+    let oyunXp = 0;
+
+    // Gün ve Saat Sistemi
+    let gun = 1;
+    let saat = 8; // 08:00
+    let dakika = 0;
+    let saatTimer = null;
+
+    let aci = 0;
+    let oyunDurdu = true;
+    let cirakVar = false;
+    let cirakInterval = null;
+    let tabakZoomModu = false; 
+
+    let seviyeMasa = 1;
+    let seviyeDekor = 1;
+    let duvarBoyasiIndex = 0;
+    const DUVAR_BOYALARI = [
+        { ad: "Klasik Gri Taş (#1)", renk: "#1e293b", detay: "#0f172a" },
+        { ad: "Şık Tuğla Kırmızı (#2)", renk: "#7f1d1d", detay: "#450a0a" },
+        { ad: "Gece Mavisi Lüks (#3)", renk: "#1e1b4b", detay: "#0f172a" },
+        { ad: "Prestij Bordo (#4)", renk: "#581c87", detay: "#3b0764" },
+        { ad: "Esnaf Altın Sarısı (#5)", renk: "#713f12", detay: "#422006" }
+    ];
+
+    let maksSure = 30;
+    let kalanSure = maksSure;
+    let zamanlayici = null;
+
+    let musteriX = -120; 
+    let stok = { 
+        pide: 5, et: 5, tereyag: 3, salca: 3, yogurt: 3, 
+        zcola: 5, zicetea: 5, zgoz: 5, ayran: 5, salgam: 5,
+        tursu: 3, patates: 3, baklava: 3, kunefe: 3, kazandibi: 3
+    };
+    let tabak = { 
+        pide: false, et: 0, tereyag: false, salca: false, yogurt: false, icecek: null,
+        tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false
+    };
+    
+    const FIYATLAR = { 
+        pide: 20, etParca: 50, tereyag: 30, salca: 20, yogurt: 20, 
+        zcola: 25, zicetea: 25, zgoz: 20, ayran: 15, salgam: 20,
+        tursu: 15, patates: 35, baklava: 50, kunefe: 60, kazandibi: 45
+    };
+    const MAX_STOK = { 
+        pide: 10, et: 10, tereyag: 5, salca: 5, yogurt: 5, 
+        zcola: 5, zicetea: 5, zgoz: 5, ayran: 5, salgam: 5,
+        tursu: 5, patates: 5, baklava: 5, kunefe: 5, kazandibi: 5
+    };
+
+    let siparis = {};
+
+    let aktifGorev = 0;
+    let gorevSayac = 0;
+    const GOREVLER = [
+        { tanimTR: "3 Müşteriye Servis Yap", hedef: 3, odul: 100, tip: "servis" },
+        { tanimTR: "5 Parça Döner Kes", hedef: 5, odul: 80, tip: "et" },
+        { tanimTR: "5 Müşteriye Servis Yap", hedef: 5, odul: 200, tip: "servis" }
+    ];
+
+    function tamEkranGec() {
+        const el = document.documentElement;
+        if (!document.fullscreenElement) {
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        }
+    }
+
+    function don(yonAci) {
+        if (tabakZoomModu) return;
+        aci = (aci + yonAci + 360) % 360;
+        guncelle();
+    }
+
+    canvas.addEventListener('click', function(e) {
+        if (oyunDurdu) return;
+        const rect = canvas.getBoundingClientRect();
+        const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+        if (tabakZoomModu) {
+            if (clickX >= 650 && clickX <= 770 && clickY >= 20 && clickY <= 70) {
+                tabakZoomModu = false;
+                guncelle();
+                return;
+            }
+            if (clickX >= 300 && clickX <= 500 && clickY >= 330 && clickY <= 380) {
+                servisEt();
+                tabakZoomModu = false;
+                return;
+            }
+            return;
+        }
+
+        const m = (aci % 360 + 360) % 360;
+
+        if (m === 0) {
+            if (clickX >= 215 && clickX <= 290 && clickY >= 310 && clickY <= 370) { pideEkle(); return; }
+            if (clickX >= 680 && clickX <= 780 && clickY >= 100 && clickY <= 220) { etEkle(); return; }
+            if (clickX >= 295 && clickX <= 355 && clickY >= 310 && clickY <= 370) { sosEkle('tereyag'); return; }
+            if (clickX >= 530 && clickX <= 595 && clickY >= 310 && clickY <= 370) { sosEkle('salca'); return; }
+            if (clickX >= 600 && clickX <= 665 && clickY >= 310 && clickY <= 370) { sosEkle('yogurt'); return; }
+            
+            if (clickX >= 5 && clickX <= 42 && clickY >= 315 && clickY <= 360) { icecekEkle('zcola'); return; }
+            if (clickX >= 48 && clickX <= 82 && clickY >= 315 && clickY <= 360) { icecekEkle('zicetea'); return; }
+            if (clickX >= 86 && clickX <= 120 && clickY >= 315 && clickY <= 360) { icecekEkle('zgoz'); return; }
+            if (clickX >= 124 && clickX <= 158 && clickY >= 315 && clickY <= 360) { icecekEkle('ayran'); return; }
+            if (clickX >= 162 && clickX <= 196 && clickY >= 315 && clickY <= 360) { icecekEkle('salgam'); return; }
+
+            if (oyunLevel >= 10) {
+                if (clickX >= 220 && clickX <= 260 && clickY >= 230 && clickY <= 275) { yanLezzetEkle('tursu'); return; }
+                if (clickX >= 270 && clickX <= 310 && clickY >= 230 && clickY <= 275) { yanLezzetEkle('patates'); return; }
+                if (clickX >= 320 && clickX <= 360 && clickY >= 230 && clickY <= 275) { yanLezzetEkle('baklava'); return; }
+                if (clickX >= 370 && clickX <= 410 && clickY >= 230 && clickY <= 275) { yanLezzetEkle('kunefe'); return; }
+                if (clickX >= 420 && clickX <= 460 && clickY >= 230 && clickY <= 275) { yanLezzetEkle('kazandibi'); return; }
+            }
+
+            if (Math.hypot(clickX - 400, clickY - 340) <= 55) {
+                tabakZoomModu = true;
+                guncelle();
+                return;
+            }
+        } else if (m === 270) {
+            if (clickX >= 340 && clickX <= 460 && clickY >= 50 && clickY <= 200) { etEkle(); return; }
+        } else if (m === 180) {
+            if (clickX >= 150 && clickX <= 370 && clickY >= 120 && clickY <= 200) { depodanAl(); return; }
+        }
+    });
+
+    function pideEkle() {
+        if (stok.pide <= 0) return alert("❌ Depoda pide kalmadı!");
+        if (tabak.pide) return alert("Tabakta zaten pide var!");
+        stok.pide--;
+        tabak.pide = true;
+        guncelle();
+    }
+
+    function etEkle() {
+        if (stok.et <= 0) return alert("❌ Depoda et kalmadı!");
+        if (tabak.et >= 4) return alert("Tabak daha fazla et almıyor!");
+        stok.et--;
+        tabak.et++;
+        gorevIlerle('et');
+        guncelle();
+    }
+
+    function sosEkle(tur) {
+        if (stok[tur] <= 0) return alert(`❌ Depoda ${tur} kalmadı!`);
+        if (tabak[tur]) return alert(`Tabakta zaten ${tur} var!`);
+        stok[tur]--;
+        tabak[tur] = true;
+        guncelle();
+    }
+
+    function icecekEkle(tur) {
+        if (stok[tur] <= 0) return alert(`❌ Depoda ${tur} kalmadı!`);
+        stok[tur]--;
+        tabak.icecek = tur;
+        guncelle();
+    }
+
+    function yanLezzetEkle(tur) {
+        if (oyunLevel < 10) return alert("❌ Yan lezzetler için 10. Level olmalısın!");
+        if (stok[tur] <= 0) return alert(`❌ Depoda ${tur} kalmadı!`);
+        if (tabak[tur]) return alert(`Tabakta zaten ${tur} var!`);
+        stok[tur]--;
+        tabak[tur] = true;
+        guncelle();
+    }
+
+    function modSec(mod) {
+        oyunModu = mod;
+        tamEkranGec();
+        document.getElementById('mod-overlay').style.display = "none";
+        document.getElementById('secim-overlay').style.display = "flex";
+        
+        if (mod === 'mobil') {
+            document.querySelectorAll('button').forEach(btn => {
+                btn.style.minHeight = "44px";
+            });
+        }
+    }
+
+    function secimYonlendir(tur) {
+        aktifIslemTuru = tur;
+        document.getElementById('secim-overlay').style.display = "none";
+        document.getElementById('giris-overlay').style.display = "flex";
+
+        const baslik = document.getElementById('form-baslik');
+        const btn = document.getElementById('btn-islem-yap');
+
+        if (tur === 'giris') {
+            baslik.textContent = "🔑 ZurnaGames Girişi";
+            btn.textContent = "Giriş Yap";
+        } else {
+            baslik.textContent = "📝 Yeni Kayıt Ol";
+            btn.textContent = "Kayıt Ol ve Başla";
+        }
+    }
+
+    function geriDonSecim() {
+        document.getElementById('giris-overlay').style.display = "none";
+        document.getElementById('secim-overlay').style.display = "flex";
+    }
+
+    function islemYap() {
+        const kullaniciAdi = document.getElementById('txt-kullanici-adi').value.trim().toLowerCase();
+        const sifre = document.getElementById('txt-sifre').value.trim();
+        let ilkKezMi = false;
+
+        if (!kullaniciAdi || !sifre) {
+            alert("Lütfen kullanıcı adı ve şifrenizi girin!");
+            return;
+        }
+
+        const kayitliKullanici = localStorage.getItem("user_" + kullaniciAdi);
+
+        if (aktifIslemTuru === 'giris') {
+            if (!kayitliKullanici) {
+                alert("❌ Böyle bir hesap bulunamadı! Önce Kayıt Olmalısın.");
+                return;
+            }
+            const userData = JSON.parse(kayitliKullanici);
+            if (userData.sifre !== sifre) {
+                alert("❌ Hatalı şifre!");
+                return;
+            }
+            mevcutKullanici = kullaniciAdi;
+            if (userData.saveData) {
+                verileriYukle(userData.saveData);
+                alert("✅ Hoş geldin! Kayıtlı oyunun yüklendi.");
+            } else {
+                alert("✅ Giriş başarılı!");
+            }
+        } else {
+            if (kayitliKullanici) {
+                alert("❌ Bu kullanıcı adı zaten alınmış! Lütfen başka bir ad seç veya Giriş Yap.");
+                return;
+            }
+            mevcutKullanici = kullaniciAdi;
+            const yeniUser = { sifre: sifre, saveData: null };
+            localStorage.setItem("user_" + kullaniciAdi, JSON.stringify(yeniUser));
+            ilkKezMi = true;
+        }
+
+        document.getElementById('lbl-kullanici').textContent = kullaniciAdi;
+        document.getElementById('giris-overlay').style.display = "none";
+        
+        if (ilkKezMi) {
+            ogreticiAdim = 0;
+            guncelleOgreticiAdimlari();
+            document.getElementById('ogretici-overlay').style.display = "flex";
+            oyunDurdu = true;
+        } else {
+            oyunDurdu = false;
+            zamanlayiciyiBaslat();
+            yeniMusteri();
+        }
+    }
+
+    function adimDegistir(yon) {
+        ogreticiAdim += yon;
+        if (ogreticiAdim > 4) {
+            document.getElementById('ogretici-overlay').style.display = "none";
+            oyunDurdu = false;
+            zamanlayiciyiBaslat();
+            yeniMusteri();
+            return;
+        }
+        if (ogreticiAdim < 0) ogreticiAdim = 0;
+        guncelleOgreticiAdimlari();
+    }
+
+    function guncelleOgreticiAdimlari() {
+        for (let i = 0; i <= 4; i++) {
+            document.getElementById(`step-${i}`).classList.remove('active');
+            document.getElementById(`dot-${i}`).classList.remove('active');
+        }
+        document.getElementById(`step-${ogreticiAdim}`).classList.add('active');
+        document.getElementById(`dot-${ogreticiAdim}`).classList.add('active');
+
+        const btnGeri = document.getElementById('btn-geri-adim');
+        const btnIleri = document.getElementById('btn-ileri-adim');
+
+        if (ogreticiAdim === 0) {
+            btnGeri.style.display = "none";
+        } else {
+            btnGeri.style.display = "block";
+        }
+
+        if (ogreticiAdim === 4) {
+            btnIleri.textContent = "Anladım Ustam! 👍";
+        } else {
+            btnIleri.textContent = "İleri ➡️";
+        }
+    }
+
+    function zamanlayiciyiBaslat() {
+        if (saatTimer) clearInterval(saatTimer);
+        saatTimer = setInterval(() => {
+            if (oyunDurdu) return;
+            dakika += 30; 
+            if (dakika >= 60) {
+                dakika = 0;
+                saat++;
+            }
+            if (saat >= 20) {
+                oyunDurdu = true;
+                document.getElementById('aksam-overlay').style.display = "flex";
+            }
+            saatGuncelleArayuz();
+        }, 2000);
+    }
+
+    function saatGuncelleArayuz() {
+        let saatStr = (saat < 10 ? "0" : "") + saat + ":" + (dakika === 0 ? "00" : "30");
+        document.getElementById('saat-deger').textContent = saatStr;
+        document.getElementById('gun-deger').textContent = gun;
+    }
+
+    function geceSecimYap(secim) {
+        document.getElementById('aksam-overlay').style.display = "none";
+        saat = 8;
+        dakika = 0;
+        gun++; 
+        if (gun % 10 === 1 && gun > 1) {
+            let vergiMiktari = Math.round(kasa * 0.25);
+            kasa -= vergiMiktari;
+            if (kasa < 0) kasa = 0;
+            document.getElementById('vergi-mesaj').innerHTML = `Vergi memuru kapıyı çaldı!<br>10 günlük döngü bittiği için kasadaki paranın <b>%25'i (${vergiMiktari} ₺)</b> vergi olarak kesildi.`;
+            document.getElementById('vergi-overlay').style.display = "flex";
+            return;
+        }
+        if (secim === 'eve') {
+            alert("🏠 Eve gidip rahat bir uyku çektin. Sabah taze bir kafayla dükkanı açıyorsun!");
+        } else {
+            alert("🌙 Dükkanda sabaha kadar dinlendin, yeni gün başladı!");
+        }
+        oyunDurdu = false;
+        saatGuncelleArayuz();
+        yeniMusteri();
+    }
+
+    function vergiOdeKapat() {
+        document.getElementById('vergi-overlay').style.display = "none";
+        oyunDurdu = false;
+        saatGuncelleArayuz();
+        yeniMusteri();
+    }
+
+    function oyunuKaydet() {
+        if (!mevcutKullanici) return alert("Kaydetmek için giriş yapmalısınız!");
+        const saveData = {
+            kasa: kasa, musteriSayisi: musteriSayisi, oyunLevel: oyunLevel, oyunXp: oyunXp,
+            gun: gun, saat: saat, dakika: dakika, stok: stok, cirakVar: cirakVar,
+            aktifGorev: aktifGorev, gorevSayac: gorevSayac, seviyeMasa: seviyeMasa,
+            seviyeDekor: seviyeDekor, duvarBoyasiIndex: duvarBoyasiIndex
+        };
+        const userData = JSON.parse(localStorage.getItem("user_" + mevcutKullanici));
+        userData.saveData = saveData;
+        localStorage.setItem("user_" + mevcutKullanici, JSON.stringify(userData));
+        alert("💾 ZurnaGames oyunun başarıyla kaydedildi!");
+    }
+
+    function verileriYukle(data) {
+        kasa = data.kasa ?? 150;
+        musteriSayisi = data.musteriSayisi ?? 1;
+        oyunLevel = data.oyunLevel ?? 1;
+        oyunXp = data.oyunXp ?? 0;
+        gun = data.gun ?? 1;
+        saat = data.saat ?? 8;
+        dakika = data.dakika ?? 0;
+        stok = data.stok ?? stok;
+        cirakVar = data.cirakVar ?? false;
+        aktifGorev = data.aktifGorev ?? 0;
+        gorevSayac = data.gorevSayac ?? 0;
+        seviyeMasa = data.seviyeMasa ?? 1;
+        seviyeDekor = data.seviyeDekor ?? 1;
+        wallColorIndex = data.duvarBoyasiIndex ?? 0;
+
+        if (cirakVar) {
+            document.getElementById('btn-cirak').textContent = "Çırak Çalışıyor";
+            cirakCalistir();
+        }
+        if (oyunLevel >= 10) {
+            document.getElementById('yan-stok-bilgi').style.display = "inline";
+        }
+        guncelleArayuzMetinleri();
+    }
+
+    function oyunuYenidenBaslat() {
+        if (confirm("🔄 Oyunu sıfırdan başlatmak istediğine emin misin?")) {
+            location.reload();
+        }
+    }
+
+    function oyunDuraklatAc() {
+        const ov = document.getElementById('ayarlar-overlay');
+        if (oyunDurdu && ov.style.display === "flex") {
+            ov.style.display = "none";
+            oyunDurdu = false;
+        } else {
+            ov.style.display = "flex";
+            oyunDurdu = true;
+        }
+    }
+
+    function menuAcKapat() {
+        const m = document.getElementById('menu-overlay');
+        m.style.display = m.style.display === "flex" ? "none" : "flex";
+    }
+
+    function gelistirAc() {
+        document.getElementById('lvl-masa').textContent = seviyeMasa;
+        document.getElementById('lvl-dekor').textContent = seviyeDekor;
+        document.getElementById('fiyat-masa').textContent = seviyeMasa * 200;
+        document.getElementById('fiyat-dekor').textContent = seviyeDekor * 150;
+        document.getElementById('txt-boya').textContent = DUVAR_BOYALARI[duvarBoyasiIndex].ad;
+        document.getElementById('gelistir-overlay').style.display = "flex";
+        oyunDurdu = true;
+    }
+
+    function gelistirKapat() {
+        document.getElementById('gelistir-overlay').style.display = "none";
+        oyunDurdu = false;
+    }
+
+    function gelistir(tip) {
+        if (tip === 'masa') {
+            let fiyat = seviyeMasa * 200;
+            if (kasa < fiyat) return alert("❌ Yeterli paran yok!");
+            kasa -= fiyat;
+            seviyeMasa++;
+            maksSure += 5;
+            alert("✅ Masa geliştirildi! Müşteri sabrı arttı.");
+        } else if (tip === 'dekor') {
+            let fiyat = seviyeDekor * 150;
+            if (kasa < fiyat) return alert("❌ Yeterli paran yok!");
+            kasa -= fiyat;
+            seviyeDekor++;
+            alert("✅ Dekorasyon yenilendi! Bahşişler artacak.");
+        }
+        gelistirAc();
+        guncelleArayuzMetinleri();
+    }
+
+    function boyaDegistir() {
+        let fiyat = 250;
+        if (kasa < fiyat) return alert("❌ Duvar boyası için 250₺ lazım!");
+        kasa -= fiyat;
+        duvarBoyasiIndex = (duvarBoyasiIndex + 1) % DUVAR_BOYALARI.length;
+        alert(`🎨 Duvar boyası "${DUVAR_BOYALARI[duvarBoyasiIndex].ad}" olarak değiştirildi!`);
+        gelistirAc();
+        guncelleArayuzMetinleri();
+    }
+
+    function depodanAl() {
+        let toplamMaliyet = 0;
+        for (let k in stok) {
+            let eksik = MAX_STOK[k] - stok[k];
+            toplamMaliyet += eksik * 10;
+        }
+        if (kasa < toplamMaliyet) return alert(`❌ Depoyu fullemek için ${toplamMaliyet} ₺ lazım!`);
+        kasa -= toplamMaliyet;
+        for (let k in stok) {
+            stok[k] = MAX_STOK[k];
+        }
+        alert(`📦 Depo tamamen dolduruldu! Maliyet: ${toplamMaliyet} ₺`);
+        guncelleArayuzMetinleri();
+    }
+
+    function cirakAl() {
+        if (cirakVar) return alert("Zaten çırağın var!");
+        if (kasa < 150) return alert("❌ Çırak için 150 ₺ lazım!");
+        kasa -= 150;
+        cirakVar = true;
+        document.getElementById('btn-cirak').textContent = "Çırak Çalışıyor";
+        cirakCalistir();
+        alert("👨‍🍳 Çırak işe başladı! Artık otomatik et kesiyor.");
+        guncelleArayuzMetinleri();
+    }
+
+    function cirakCalistir() {
+        if (cirakInterval) clearInterval(cirakInterval);
+        cirakInterval = setInterval(() => {
+            if (oyunDurdu) return;
+            if (stok.et < MAX_STOK.et) {
+                stok.et++;
+                guncelleArayuzMetinleri();
+            }
+        }, 5000);
+    }
+
+    function cikisYap() {
+        if (confirm("🚪 Çıkış yapmak istediğine emin misin? Kaydedilmemiş ilerlemen kaybolur!")) {
+            location.reload();
+        }
+    }
+
+    function yeniMusteri() {
+        musteriX = -120;
+        kalanSure = maksSure;
+        if (zamanlayici) clearInterval(zamanlayici);
+
+        let porsiyonlar = ['Yarim', 'Normal', 'Mega'];
+        let secilenPorsiyon = porsiyonlar[Math.floor(Math.random() * porsiyonlar.length)];
+        let etAdet = secilenPorsiyon === 'Yarim' ? 1 : (secilenPorsiyon === 'Normal' ? 3 : 4);
+
+        siparis = {
+            pide: true,
+            et: etAdet,
+            tereyag: Math.random() > 0.5,
+            salca: Math.random() > 0.4,
+            yogurt: Math.random() > 0.4,
+            icecek: ['zcola', 'zicetea', 'zgoz', 'ayran', 'salgam'][Math.floor(Math.random() * 5)],
+            tursu: oyunLevel >= 10 && Math.random() > 0.5,
+            patates: oyunLevel >= 10 && Math.random() > 0.6,
+            baklava: oyunLevel >= 10 && Math.random() > 0.7,
+            kunefe: oyunLevel >= 10 && Math.random() > 0.8,
+            kazandibi: oyunLevel >= 10 && Math.random() > 0.8,
+            nadir: Math.random() < 0.15 // Tekerlekli sandalye / Nadir müşteri
+        };
+
+        zamanlayici = setInterval(() => {
+            if (oyunDurdu) return;
+            kalanSure--;
+            document.getElementById('kalan-saniye').textContent = kalanSure;
+            let yuzde = (kalanSure / maksSure) * 100;
+            const bari = document.getElementById('sabir-bari');
+            bari.style.width = yuzde + "%";
+            if (yuzde > 50) bari.style.backgroundColor = "#22c55e";
+            else if (yuzde > 20) bari.style.backgroundColor = "#eab308";
+            else bari.style.backgroundColor = "#ef4444";
+
+            if (kalanSure <= 0) {
+                clearInterval(zamanlayici);
+                alert("⏰ Müşteri sabrını yitirdi ve kızıp gitti! (-20 ₺ ceza)");
+                kasa -= 20;
+                if (kasa < 0) kasa = 0;
+                yeniMusteri();
+            }
+        }, 1000);
+
+        guncelle();
+    }
+
+    function tabakSifirla() {
+        tabak = { pide: false, et: 0, tereyag: false, salca: false, yogurt: false, icecek: null, tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false };
+    }
+
+    function servisEt() {
+        if (!tabak.pide) return alert("❌ Tabakta pide yok!");
+        
+        // Puan hesapla
+        let toplamTutar = FIYATLAR.pide + (tabak.et * FIYATLAR.etParca);
+        if (tabak.tereyag) toplamTutar += FIYATLAR.tereyag;
+        if (tabak.salca) toplamTutar += FIYATLAR.salca;
+        if (tabak.yogurt) toplamTutar += FIYATLAR.yogurt;
+        if (tabak.icecek) toplamTutar += FIYATLAR.icecek ? FIYATLAR[tabak.icecek] || 20 : 0;
+
+        if (siparis.nadir) {
+            toplamTutar *= 2;
+            alert("♿ Nadir müşteri memnun kaldı! 2X Bahşiş kazandın!");
+        }
+
+        toplamTutar += (seviyeDekor - 1) * 10;
+        kasa += toplamTutar;
+        oyunXp += 20;
+
+        if (oyunXp >= oyunLevel * 100) {
+            oyunLevel++;
+            oyunXp = 0;
+            alert(`🎉 Tebrikler! ZurnaGames Level ${oyunLevel} oldun! Yeni özelliklerin kilidi açıldı.`);
+            if (oyunLevel >= 10) {
+                document.getElementById('yan-stok-bilgi').style.display = "inline";
+            }
+        }
+
+        gorevIlerle('servis');
+        tabakSifirla();
+        clearInterval(zamanlayici);
+        alert(`✅ Servis başarılı! Kazanılan: ${toplamTutar} ₺`);
+        yeniMusteri();
+    }
+
+    function gorevIlerle(tip) {
+        let g = GOREVLER[aktifGorev];
+        if (g.tip === tip) {
+            gorevSayac++;
+            if (gorevSayac >= g.hedef) {
+                kasa += g.odul;
+                alert(`🎯 Görev Tamamlandı! +${g.odul} ₺ ödül kazandın.`);
+                gorevSayac = 0;
+                aktifGorev = (aktifGorev + 1) % GOREVLER.length;
+            }
+            guncelleGorevArayuz();
+        }
+    }
+
+    function guncelleGorevArayuz() {
+        let g = GOREVLER[aktifGorev];
+        document.getElementById('gorev-tanim').textContent = g.tanimTR;
+        document.getElementById('gorev-ilerleme').textContent = `${gorevSayac}/${g.hedef}`;
+        document.getElementById('gorev-odul').textContent = g.odul;
+    }
+
+    function guncelleArayuzMetinleri() {
+        document.getElementById('kasa').textContent = kasa;
+        document.getElementById('m-sayi').textContent = musteriSayisi;
+        document.getElementById('lvl-deger').textContent = oyunLevel;
+
+        document.getElementById('stok-pide').textContent = stok.pide;
+        document.getElementById('stok-et').textContent = stok.et;
+        document.getElementById('stok-salca').textContent = stok.salca;
+        document.getElementById('stok-tereyag').textContent = stok.tereyag;
+        document.getElementById('stok-yogurt').textContent = stok.yogurt;
+        document.getElementById('stok-zcola').textContent = stok.zcola;
+        document.getElementById('stok-zicetea').textContent = stok.zicetea;
+        document.getElementById('stok-zgoz').textContent = stok.zgoz;
+        document.getElementById('stok-ayran').textContent = stok.ayran;
+        document.getElementById('stok-salgam').textContent = stok.salgam;
+
+        if (oyunLevel >= 10) {
+            document.getElementById('stok-tursu').textContent = stok.tursu;
+            document.getElementById('stok-patates').textContent = stok.patates;
+            document.getElementById('stok-baklava').textContent = stok.baklava;
+            document.getElementById('stok-kunefe').textContent = stok.kunefe;
+            document.getElementById('stok-kazandibi').textContent = stok.kazandibi;
+        }
+    }
+
+    function guncelle() {
+        guncelleArayuzMetinleri();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let renkPaleti = DUVAR_BOYALARI[duvarBoyasiIndex];
+
+        // Arka Plan Duvar ve Zemin
+        ctx.fillStyle = renkPaleti.renk;
+        ctx.fillRect(0, 0, canvas.width, 250);
+        ctx.fillStyle = renkPaleti.detay;
+        ctx.fillRect(0, 250, canvas.width, 150);
+
+        // Pencere (Saat Görseli)
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(320, 30, 160, 90);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(320, 30, 160, 90);
+        ctx.fillStyle = (saat >= 19 || saat < 6) ? "#090d16" : "#38bdf8";
+        ctx.fillRect(330, 40, 140, 70);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "12px Arial";
+        ctx.fillText((saat >= 19 || saat < 6) ? "🌙 Gece Vakti" : "☀️ Gündüz Vakti", 355, 75);
+
+        const m = (aci % 360 + 360) % 360;
+
+        if (tabakZoomModu) {
+            // Tabak Zoom Ekranı
+            ctx.fillStyle = "rgba(0,0,0,0.85)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#facc15";
+            ctx.font = "20px Arial";
+            ctx.fillText("🍽️ ZurnaGames - Tabak Detay ve Kalite Kontrolü", 180, 50);
+
+            // Tabak Çizimi
+            ctx.beginPath();
+            ctx.arc(400, 200, 90, 0, Math.PI * 2);
+            ctx.fillStyle = "#b45309";
+            ctx.fill();
+            ctx.strokeStyle = "#78350f";
+            ctx.lineWidth = 8;
+            ctx.stroke();
+
+            if (tabak.pide) {
+                ctx.fillStyle = "#d97706";
+                ctx.beginPath();
+                ctx.ellipse(400, 200, 70, 50, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (tabak.et > 0) {
+                ctx.fillStyle = "#451a03";
+                for (let i = 0; i < tabak.et; i++) {
+                    ctx.fillRect(370 + (i * 15), 180 + (i % 2 * 10), 25, 12);
+                }
+            }
+            if (tabak.salca) {
+                ctx.fillStyle = "#dc2626";
+                ctx.fillRect(385, 190, 30, 20);
+            }
+            if (tabak.tereyag) {
+                ctx.fillStyle = "#fef08a";
+                ctx.fillRect(390, 195, 20, 12);
+            }
+            if (tabak.yogurt) {
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(430, 190, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Butonlar
+            ctx.fillStyle = "#22c55e";
+            ctx.fillRect(300, 330, 200, 50);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 16px Arial";
+            ctx.fillText("✅ SERVİS ET", 340, 362);
+
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(650, 20, 120, 50);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText("❌ Kapat", 685, 52);
+
+            // Müşteri Sipariş Bilgisi
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "14px Arial";
+            ctx.fillText(`Müşteri İsteği: Pide (${tabak.pide ? 'Var' : 'Yok'}), Et (${tabak.et}/${siparis.et}), Soslar Tamam mı?`, 180, 310);
+            return;
+        }
+
+        if (m === 0) {
+            // Ön Tezgah ve İstasyonlar
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(215, 310, 75, 60);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "12px Arial";
+            ctx.fillText("🫓 Pide", 235, 345);
+
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(295, 310, 60, 60);
+            ctx.fillText("🧈 Yağ", 310, 345);
+
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(530, 310, 65, 60);
+            ctx.fillText("🍅 Salça", 540, 345);
+
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(600, 310, 65, 60);
+            ctx.fillText("🥛 Yoğurt", 608, 345);
+
+            // İçecekler
+            let icecekler = ['Cola', 'Tea', 'Göz', 'Ayran', 'Şalgam'];
+            let ix = 5;
+            icecekler.forEach(ic => {
+                ctx.fillStyle = "#475569";
+                ctx.fillRect(ix, 315, 36, 45);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "10px Arial";
+                ctx.fillText(ic, ix + 4, 342);
+                ix += 43;
+            });
+
+            // Et Döner Kesim İstasyonu (Sağda)
+            ctx.fillStyle = "#78350f";
+            ctx.fillRect(680, 100, 100, 120);
+            ctx.fillStyle = "#f59e0b";
+            ctx.font = "12px Arial";
+            ctx.fillText("🥩 Et Kesim", 695, 160);
+
+            // Yan Lezzetler (Level 10+)
+            if (oyunLevel >= 10) {
+                let yanlar = ['Turşu', 'Patates', 'Baklava', 'Künefe', 'Kazan'];
+                let yx = 220;
+                yanlar.forEach(yl => {
+                    ctx.fillStyle = "#581c87";
+                    ctx.fillRect(yx, 230, 40, 45);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "9px Arial";
+                    ctx.fillText(yl, yx + 4, 257);
+                    yx += 50;
+                });
+            }
+
+            // Ana Tabak (Tezgah Ortası)
+            ctx.beginPath();
+            ctx.arc(400, 340, 50, 0, Math.PI * 2);
+            ctx.fillStyle = "#b45309";
+            ctx.fill();
+            ctx.strokeStyle = "#78350f";
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            if (tabak.pide) {
+                ctx.fillStyle = "#d97706";
+                ctx.beginPath();
+                ctx.ellipse(400, 340, 35, 25, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (tabak.et > 0) {
+                ctx.fillStyle = "#451a03";
+                for (let i = 0; i < tabak.et; i++) {
+                    ctx.fillRect(385 + (i * 8), 330 + (i % 2 * 6), 14, 8);
+                }
+            }
+
+            // Müşteri Karşılama Alanı
+            if (musteriX < 300) musteriX += 3;
+            ctx.fillStyle = siparis.nadir ? "#ec4899" : "#38bdf8";
+            ctx.fillRect(musteriX, 160, 60, 90);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "11px Arial";
+            ctx.fillText(siparis.nadir ? "♿ Nadir" : "👤 Müşteri", musteriX + 5, 150);
+
+            // Müşteri Balonu (İsteği)
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(musteriX + 70, 140, 160, 50);
+            ctx.fillStyle = "#000000";
+            ctx.font = "11px Arial";
+            ctx.fillText(`İstek: Pide, ${siparis.et} Et`, musteriX + 78, 160);
+            ctx.fillText(`İçecek: ${siparis.icecek}`, musteriX + 78, 178);
+
+        } else if (m === 270) {
+            ctx.fillStyle = "#78350f";
+            ctx.fillRect(340, 50, 120, 150);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "14px Arial";
+            ctx.fillText("🥩 Et Döner Tezgahı", 330, 30);
+            ctx.fillText("Et kesmek için tıklayın!", 330, 220);
+        } else if (m === 180) {
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(150, 120, 220, 80);
+            ctx.fillStyle = "#facc15";
+            ctx.font = "14px Arial";
+            ctx.fillText("📦 Depo Odası", 210, 100);
+            ctx.fillText("Depoyu fullemek için tıklayın!", 160, 230);
+        }
+    }
+
+    guncelle();
+</script>
+</body>
+</html>

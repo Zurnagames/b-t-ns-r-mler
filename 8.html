@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="tr" id="html-kok">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="sayfa-baslik">İskender Simulator Pro - Tabela & Ultra Sürüm</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+        #oyun-alani {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 850px;
+            position: relative;
+        }
+
+        #ust-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .rozet {
+            background-color: #334155;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        #gorev-kutusu {
+            background-color: #1e293b;
+            border: 2px solid #eab308;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        #sabir-kapsayici {
+            width: 100%;
+            background-color: #334155;
+            border-radius: 6px;
+            height: 16px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #sabir-bari {
+            width: 100%;
+            height: 100%;
+            background-color: #22c55e;
+            transition: width 1s linear, background-color 0.5s;
+        }
+
+        #sabir-yazi {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 16px;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #canvas-kapsayici {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 1;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            border-radius: 8px;
+            display: block;
+            background-color: #000;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.96);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 15px;
+        }
+
+        .giris-kutusu {
+            background-color: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            text-align: center;
+            width: 100%;
+            max-width: 440px;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .giris-kutusu h2 { margin-top: 0; color: #facc15; font-size: 18px; }
+        .giris-kutusu input, .giris-kutusu select {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 14px;
+        }
+
+        #tabela-onizleme {
+            width: 100%;
+            height: 80px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            border: 2px dashed #475569;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        }
+
+        #stok-paneli {
+            background-color: #334155;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        #tezgah {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            border: none;
+            padding: 10px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            user-select: none;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-mod { background-color: #6366f1; color: white; margin-bottom: 8px; width: 100%; }
+        .btn-yon { background-color: #3b82f6; color: white; }
+        .btn-depo { background-color: #a855f7; color: white; grid-column: span 2; }
+        .btn-kaydet { background-color: #06b6d4; color: white; }
+        .btn-duraklat { background-color: #ef4444; color: white; }
+        .btn-sifirla { background-color: #f97316; color: white; }
+        .btn-basla { background-color: #22c55e; color: white; width: 100%; padding: 12px; margin-top: 10px; }
+        .btn-menu { background-color: #8b5cf6; color: white; }
+
+        #durum {
+            grid-column: 1 / -1;
+            margin-top: 5px;
+            background-color: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            color: #38bdf8;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .menu-liste {
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .tutorial-step {
+            display: none;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .tutorial-step.active { display: block; }
+        .step-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #475569;
+        }
+        .dot.active { background-color: #22c55e; }
+
+        .dil-izgara {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 6px;
+            margin: 10px 0;
+            text-align: left;
+        }
+        .dil-btn {
+            background-color: #334155;
+            color: white;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid #475569;
+            transition: 0.2s;
+        }
+        .dil-btn:hover {
+            background-color: #475569;
+            border-color: #facc15;
+        }
+    </style>
+</head>
+<body>
+
+<div id="oyun-alani">
+    <div id="ust-bar">
+        <div class="rozet">👤 <span id="lbl-kullanici" style="color:#facc15;">Misafir</span></div>
+        <div class="rozet">🏷️ <span id="lbl-tabela" style="color:#facc15;">Tabela Yok</span></div>
+        <div class="rozet">⭐ Level: <span id="lvl-deger" style="color:#38bdf8;">1</span></div>
+        <div class="rozet">💰 <span id="kasa" style="color:#4ade80;">150</span> ₺</div>
+        <div>
+            <button class="btn-menu" id="btn-menu-txt" onclick="menuAcKapat()">📜 Menü</button>
+            <button class="btn-kaydet" onclick="oyunuKaydet()">💾</button>
+            <button class="btn-sifirla" onclick="oyunuYenidenBaslat()">🔄</button>
+            <button class="btn-duraklat" onclick="oyunDuraklatAc()">⏸️</button>
+            <button style="background:#64748b; color:white;" onclick="tamEkranGec()">⛶</button>
+            <button style="background:#64748b; color:white;" onclick="cikisYap()">🚪</button>
+        </div>
+        <div class="rozet"><span id="lbl-musteri-etiket">Müşteri</span>: <span id="m-sayi" style="color:#f43f5e;">1</span></div>
+    </div>
+
+    <div id="gorev-kutusu">
+        <div>🎯 <b id="lbl-gorev-baslik">Görev:</b> <span id="gorev-tanim" style="color:#facc15;">3 Servis Yap</span> (<span id="gorev-ilerleme">0/3</span>)</div>
+        <div style="color:#4ade80; font-weight:bold;">+<span id="gorev-odul">100</span>₺</div>
+    </div>
+
+    <div id="sabir-kapsayici">
+        <div id="sabir-bari"></div>
+        <div id="sabir-yazi"><span id="lbl-sabir-metin">Sabır</span>: <span id="kalan-saniye">30</span> sn</div>
+    </div>
+
+    <div id="canvas-kapsayici">
+        <canvas id="oyunCanvas" width="800" height="400"></canvas>
+        
+        <div id="dil-overlay" class="overlay" style="z-index: 100;">
+            <div class="giris-kutusu">
+                <h2 id="dil-secim-baslik">🌍 Dil ve Bölge Seçimi</h2>
+                <p id="dil-secim-aciklama" style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">Dükkan tabelan ve sistem dilin için dil seç:</p>
+                <div class="dil-izgara">
+                    <button class="dil-btn" onclick="dilSec('tr')">
+                        <span>🇹🇷 Türkçe</span>
+                        <span style="font-size: 11px; color: #22c55e;">Seç</span>
+                    </button>
+                    <button class="dil-btn" onclick="dilSec('en')">
+                        <span>🇬🇧 English (İngilizce)</span>
+                        <span style="font-size: 11px; color: #38bdf8;">Select</span>
+                    </button>
+                    <button class="dil-btn" onclick="dilSec('zh')">
+                        <span>🇨🇳 中文 (Çince / Mandarin)</span>
+                        <span style="font-size: 11px; color: #38bdf8;">选择</span>
+                    </button>
+                    <button class="dil-btn" onclick="dilSec('hi')">
+                        <span>🇮🇳 हिन्दी (Hintçe / Hindi)</span>
+                        <span style="font-size: 11px; color: #38bdf8;">चुनें</span>
+                    </button>
+                    <button class="dil-btn" onclick="dilSec('es')">
+                        <span>🇪🇸 Español (İspanyolca)</span>
+                        <span style="font-size: 11px; color: #38bdf8;">Seleccionar</span>
+                    </button>
+                    <button class="dil-btn" onclick="dilSec('fr')">
+                        <span>🇫🇷 Français (Fransızca)</span>
+                        <span style="font-size: 11px; color: #38bdf8;">Sélectionner</span>
+                    </button>
+                </div>
+                <div id="secilen-dil-bilgi" style="font-size: 12px; color: #facc15; margin-top:5px; min-height:18px;"></div>
+            </div>
+        </div>
+
+        <div id="mod-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="mod-secim-baslik">🎮 Cihaz Tipi Seçin</h2>
+                <p id="mod-secim-aciklama" style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">En iyi deneyim için cihazınızı seçin:</p>
+                <button class="btn-mod" id="btn-mobil-txt" onclick="modSec('mobil')">📱 Mobil / Tablet</button>
+                <button class="btn-mod" id="btn-masaustu-txt" style="background-color:#3b82f6;" onclick="modSec('masaustu')">💻 Masaüstü / Bilgisayar</button>
+            </div>
+        </div>
+
+        <div id="secim-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="hesap-secim-baslik">👤 Hesap İşlemi</h2>
+                <p id="hesap-secim-aciklama" style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Dükkanına devam etmek için ne yapmak istersin?</p>
+                <button class="btn-mod" id="btn-giris-sec-txt" style="background-color:#22c55e;" onclick="secimYonlendir('giris')">🔑 Giriş Yap</button>
+                <button class="btn-mod" id="btn-kayit-sec-txt" style="background-color:#a855f7; margin-top:5px;" onclick="secimYonlendir('kayit')">📝 Kayıt Ol</button>
+            </div>
+        </div>
+
+        <div id="giris-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="form-baslik">🔑 Dükkan Girişi</h2>
+                <input type="text" id="txt-kullanici-adi" placeholder="Kullanıcı Adın">
+                <input type="password" id="txt-sifre" placeholder="Şifren">
+                <button class="btn-basla" id="btn-islem-yap" onclick="islemYap()">Devam Et</button>
+                <button class="btn-duraklat" id="btn-geri-don-txt" style="width:100%; margin-top:8px;" onclick="geriDonSecim()">🔙 Geri Dön</button>
+            </div>
+        </div>
+
+        <div id="tabela-overlay" class="overlay" style="display: none; z-index: 60;">
+            <div class="giris-kutusu">
+                <h2 id="tabela-baslik">✨ Dükkanın Kral Tabelasını Tasarla</h2>
+                <p id="tabela-aciklama" style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">Esnaflığın ilk kuralı dikkat çekici tabeladır, koçum!</p>
+                
+                <div id="tabela-onizleme">
+                    <span id="tabela-onizleme-yazi">İskender Diyarım</span>
+                </div>
+
+                <div style="text-align: left; margin-bottom: 10px;">
+                    <label id="lbl-tabela-yazi" style="font-size:12px; color:#38bdf8; font-weight:bold;">Tabela Yazısı (Arial):</label>
+                    <input type="text" id="tabela-input-yazi" value="İskender Diyarım" oninput="tabelaGuncelleIzle()">
+                </div>
+
+                <div style="text-align: left; margin-bottom: 10px;">
+                    <label id="lbl-tabela-stil" style="font-size:12px; color:#38bdf8; font-weight:bold;">Arka Plan Stili:</label>
+                    <select id="tabela-arkaplan" onchange="tabelaGuncelleIzle()">
+                        <option value="#7f1d1d">Şık Tuğla Kırmızı</option>
+                        <option value="#1e1b4b">Gece Mavisi Lüks</option>
+                        <option value="#581c87">Prestij Bordo</option>
+                        <option value="#713f12">Esnaf Altın Sarısı</option>
+                        <option value="#0f172a">Klasik Gri Taş</option>
+                    </select>
+                </div>
+
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label id="lbl-tabela-renk" style="font-size:12px; color:#38bdf8; font-weight:bold;">Yazı Rengi:</label>
+                    <input type="color" id="tabela-renk" value="#facc15" style="height:38px; padding:0; cursor:pointer;" oninput="tabelaGuncelleIzle()">
+                </div>
+
+                <button class="btn-basla" id="btn-tabela-as-txt" onclick="tabelayiAsSurucu()">Tabelayı As ve Dükkana Gir 🚀</button>
+            </div>
+        </div>
+
+        <div id="ogretici-overlay" class="overlay" style="display: none; z-index: 50;">
+            <div class="giris-kutusu">
+                <h2 id="ogretici-ana-baslik" style="color:#22c55e;">🎓 Ustanın Çırağına Rehberi</h2>
+                <div class="step-indicators">
+                    <div class="dot active" id="dot-0"></div>
+                    <div class="dot" id="dot-1"></div>
+                    <div class="dot" id="dot-2"></div>
+                    <div class="dot" id="dot-3"></div>
+                    <div class="dot" id="dot-4"></div>
+                </div>
+                <div class="tutorial-step active" id="step-0">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b id="t-s1-b">Adım 1: Tırnak Pidesi</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">⬇️ 🫓 ⬇️</p>
+                    <p id="t-s1-p" style="text-align: center;">Önce tezgahlardan tırnak pideni seçip tabağa ekle!</p>
+                </div>
+                <div class="tutorial-step" id="step-1">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b id="t-s2-b">Adım 2: Et Kesimi</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">➡️ 🥩 ➡️</p>
+                    <p id="t-s2-p" style="text-align: center;">Sağa dönerek tezgahtan lezzetli etler kes ve tabağı donat!</p>
+                </div>
+                <div class="tutorial-step" id="step-2">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b id="t-s3-b">Adım 3: Soslar & Soğuk İçecekler</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">🍅 🧈 🥛 🥤</p>
+                    <p id="t-s3-p" style="text-align: center;">Siparişe göre salça, tereyağ, yoğurt ve mutlaka soğuk içecekleri eklemeyi unutma!</p>
+                </div>
+                <div class="tutorial-step" id="step-3">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b id="t-s4-b">Adım 4: Mimari ve Level</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">⭐ 🎨 🥗 🍟 🍮</p>
+                    <p id="t-s4-p" style="text-align: center;">XP kasarak level atla! Dükkan Geliştir menüsünden duvar boyasını değiştir.</p>
+                </div>
+                <div class="tutorial-step" id="step-4">
+                    <p style="text-align: center; font-size: 16px; color: #facc15;"><b id="t-s5-b">Adım 5: Servis Zamanı</b></p>
+                    <p style="text-align: center; font-size: 24px; margin: 10px 0;">🔍 ➡️ ✅</p>
+                    <p id="t-s5-p" style="text-align: center;">Tabağa tıklayarak detaylı ekrana geç, kontrol et ve müşteriye servis et!</p>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-mod" id="btn-geri-adim" style="background-color: #475569; display:none;" onclick="adimDegistir(-1)">Geri</button>
+                    <button class="btn-basla" id="btn-ileri-adim" onclick="adimDegistir(1)" style="margin-top:0;">İleri ➡️</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="menu-baslik-txt">📜 DÜKKAN MENÜSÜ & TARİFLER</h2>
+                <div class="menu-liste" id="menu-liste-icerik">
+                    <p>🫓 <b>Tırnak Pidesi Tabanı:</b> 20 ₺</p>
+                    <p>🥩 <b>Et Döner (Parça):</b> 50 ₺</p>
+                    <p>🍅 <b>Salça Sos:</b> 20 ₺</p>
+                    <p>🧈 <b>Tereyağ:</b> 30 ₺</p>
+                    <p>🥛 <b>Yoğurt:</b> 20 ₺</p>
+                    <hr style="border-color:#334155;">
+                    <p style="color:#38bdf8;">🧊 <b>Soğuk İçecekler:</b></p>
+                    <p style="margin-left: 10px; font-size: 12px; color: #cbd5e1;"> • 🥤 <b>Cola:</b> 25 ₺ | 🥤 <b>IcedTea:</b> 25 ₺<br> • 🍾 <b>Gazoz:</b> 20 ₺ | 🥛 <b>Ayran:</b> 15 ₺ | 🍷 <b>Şalgam:</b> 20 ₺ </p>
+                </div>
+                <button class="btn-duraklat" id="btn-menu-kapat-txt" style="width:100%; padding:10px; margin-top:10px;" onclick="menuAcKapat()">Kapat</button>
+            </div>
+        </div>
+
+        <div id="detay-overlay" class="overlay" style="display: none;">
+            <div class="giris-kutusu">
+                <h2 id="detay-baslik-txt">🔍 Sipariş Kontrol Noktası</h2>
+                <p id="detay-aciklama-txt" style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">Müşteriye gitmeden önce tabağı dikkatlice incele:</p>
+                <div id="detay-icerik" style="background:#0f172a; padding:12px; border-radius:6px; font-size:13px; text-align:left; line-height:1.6; margin-bottom:15px; border:1px solid #334155;"></div>
+                <button class="btn-basla" id="btn-servis-et-txt" onclick="servisEtOnayla()" style="margin-top:0;">✅ Müşteriye Servis Et</button>
+                <button class="btn-duraklat" id="btn-detay-geri-txt" style="width:100%; margin-top:8px;" onclick="detayKapat()">🔙 Geri Dön</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tezgah">
+        <button class="btn-yon" id="btn-sol-tezgah-txt" onclick="yonDegis(-1)">⬅️ Sol Tezgah</button>
+        <button class="btn-yon" id="btn-sag-tezgah-txt" onclick="yonDegis(1)">Sağ Tezgah ➡️</button>
+        <button class="btn-depo" id="btn-depo-ac-txt" onclick="depoAc()">📦 Malzeme Deposu</button>
+        <div id="durum">Tezgah Hazır.</div>
+    </div>
+</div>
+
+<script>
+    let secilenDil = 'tr';
+
+    const dilSozlugu = {
+        tr: {
+            sayfaBaslik: "İskender Simulator Pro - Tabela & Ultra Sürüm",
+            misafir: "Misafir",
+            tabelaYok: "Tabela Yok",
+            menu: "📜 Menü",
+            musteri: "Müşteri",
+            gorevBaslik: "Görev:",
+            servisYapGorev: "3 Servis Yap",
+            sabir: "Sabır",
+            dilSecBaslik: "🌍 Dil ve Bölge Seçimi",
+            dilSecAciklama: "Dükkan tabelan ve sistem dilin için dil seç:",
+            modSecBaslik: "🎮 Cihaz Tipi Seçin",
+            modSecAciklama: "En iyi deneyim için cihazınızı seçin:",
+            mobilBtn: "📱 Mobil / Tablet",
+            masaustuBtn: "💻 Masaüstü / Bilgisayar",
+            hesapSecBaslik: "👤 Hesap İşlemi",
+            hesapSecAciklama: "Dükkanına devam etmek için ne yapmak istersin?",
+            girisYapBtn: "🔑 Giriş Yap",
+            kayitOlBtn: "📝 Kayıt Ol",
+            girisBaslik: "🔑 Dükkan Girişi",
+            kayitBaslik: "📝 Yeni Dükkan Kaydı",
+            kullaniciPlaceholder: "Kullanıcı Adın",
+            sifrePlaceholder: "Şifren",
+            devamEtBtn: "Devam Et",
+            kayitBaslaBtn: "Kayıt Ol ve Başla",
+            geriDonBtn: "🔙 Geri Dön",
+            tabelaBaslik: "✨ Dükkanın Kral Tabelasını Tasarla",
+            tabelaAciklama: "Esnaflığın ilk kuralı dikkat çekici tabeladır, koçum!",
+            tabelaYaziLabel: "Tabela Yazısı (Arial):",
+            tabelaStilLabel: "Arka Plan Stili:",
+            tabelaRenkLabel: "Yazı Rengi:",
+            tabelaAsBtn: "Tabelayı As ve Dükkana Gir 🚀",
+            ogreticiBaslik: "🎓 Ustanın Çırağına Rehberi",
+            adim1B: "Adım 1: Tırnak Pidesi",
+            adim1P: "Önce tezgahlardan tırnak pideni seçip tabağa ekle!",
+            adim2B: "Adım 2: Et Kesimi",
+            adim2P: "Sağa dönerek tezgahtan lezzetli etler kes ve tabağı donat!",
+            adim3B: "Adım 3: Soslar & Soğuk İçecekler",
+            adim3P: "Siparişe göre salça, tereyağ, yoğurt ve mutlaka soğuk içecekleri eklemeyi unutma!",
+            adim4B: "Adım 4: Mimari ve Level",
+            adim4P: "XP kasarak level atla! Dükkan Geliştir menüsünden duvar boyasını değiştir.",
+            adim5B: "Adım 5: Servis Zamanı",
+            adim5P: "Tabağa tıklayarak detaylı ekrana geç, kontrol et ve müşteriye servis et!",
+            ileriBtn: "İleri ➡️",
+            geriBtn: "Geri",
+            oyunaBaslaBtn: "Oyuna Başla 🚀",
+            menuBaslik: "📜 DÜKKAN MENÜSÜ & TARİFLER",
+            kapatBtn: "Kapat",
+            detayBaslik: "🔍 Sipariş Kontrol Noktası",
+            detayAciklama: "Müşteriye gitmeden önce tabağı dikkatlice incele:",
+            servisEtBtn: "✅ Müşteriye Servis Et",
+            solTezgah: "⬅️ Sol Tezgah",
+            sagTezgah: "Sağ Tezgah ➡️",
+            depoAcBtn: "📦 Malzeme Deposu",
+            tezgahHazir: "Tezgah Hazır.",
+            pideTaban: "🫓 Tırnak Pidesi Tabanı",
+            etPars: "Parça Et",
+            salcaSos: "Salça Sos",
+            yogurt: "Yoğurt",
+            tereyag: "Tereyağ",
+            sossuz: "Sossuz",
+            istiyorIstemiyor: "İçecek İstemiyor",
+            musteriIstem: "Müşteri İstemi / Tabağın:",
+            pideEklendi: "Tırnak pidesi tabana eklendi.",
+            pideBitti: "Pide stokta kalmadı! Depodan al.",
+            etEklendi: "parça et eklendi.",
+            etBitti: "Et bitti! Depodan et al.",
+            salcaDegisti: "Salça sos eklendi/çıkarıldı.",
+            yogurtDegisti: "Yoğurt eklendi/çıkarıldı.",
+            tereyagDegisti: "Kızgın tereyağ gezdirildi!",
+            icecekEklendi: "tabağa eklendi.",
+            icecekKaldirildi: "İçecek kaldırıldı.",
+            sinirlendi: "Müşteri sinirlenip terk etti! Bahşiş alamadın.",
+            harikaServis: "Harika servis! kazandın.",
+            levelAtlandi: "Tebrikler! Level oldun!",
+            siparişim: "💬 Siparişim:",
+            konumSol: "Sol Tezgah (Pide & Et)",
+            konumOrta: "Orta Tezgah (Soslar & İçecekler)",
+            konumSag: "Sağ Tezgah (Yan Lezzetler)",
+            aktifKonum: "Aktif Konum:"
+        },
+        en: {
+            sayfaBaslik: "Iskender Simulator Pro - Sign & Ultra Edition",
+            misafir: "Guest",
+            tabelaYok: "No Sign",
+            menu: "📜 Menu",
+            musteri: "Customer",
+            gorevBaslik: "Quest:",
+            servisYapGorev: "Serve 3 Orders",
+            sabir: "Patience",
+            dilSecBaslik: "🌍 Language & Region Selection",
+            dilSecAciklama: "Select language for your shop sign and system language:",
+            modSecBaslik: "🎮 Select Device Type",
+            modSecAciklama: "Select your device for the best experience:",
+            mobilBtn: "📱 Mobile / Tablet",
+            masaustuBtn: "💻 Desktop / Computer",
+            hesapSecBaslik: "👤 Account Action",
+            hesapSecAciklama: "What would you like to do to continue to your shop?",
+            girisYapBtn: "🔑 Log In",
+            kayitOlBtn: "📝 Register",
+            girisBaslik: "🔑 Shop Login",
+            kayitBaslik: "📝 New Shop Registration",
+            kullaniciPlaceholder: "Your Username",
+            sifrePlaceholder: "Your Password",
+            devamEtBtn: "Continue",
+            kayitBaslaBtn: "Register & Start",
+            geriDonBtn: "🔙 Go Back",
+            tabelaBaslik: "✨ Design Your Shop's King Sign",
+            tabelaAciklama: "The first rule of trade is an eye-catching sign, buddy!",
+            tabelaYaziLabel: "Sign Text (Arial):",
+            tabelaStilLabel: "Background Style:",
+            tabelaRenkLabel: "Text Color:",
+            tabelaAsBtn: "Hang Sign & Enter Shop 🚀",
+            ogreticiBaslik: "🎓 Master's Guide for Apprentice",
+            adim1B: "Step 1: Pita Bread",
+            adim1P: "First, select pita bread from the counters and add it to the plate!",
+            adim2B: "Step 2: Meat Cutting",
+            adim2P: "Turn right, cut delicious meat from the counter and stock up the plate!",
+            adim3B: "Step 3: Sauces & Cold Drinks",
+            adim3P: "Don't forget to add paste, butter, yogurt and definitely cold drinks according to the order!",
+            adim4B: "Step 4: Architecture & Level",
+            adim4P: "Grind XP to level up! Change wall paint from the Shop Upgrade menu.",
+            adim5B: "Step 5: Serving Time",
+            adim5P: "Click on the plate to open detailed view, check and serve to the customer!",
+            ileriBtn: "Next ➡️",
+            geriBtn: "Back",
+            oyunaBaslaBtn: "Start Game 🚀",
+            menuBaslik: "📜 SHOP MENU & RECIPES",
+            kapatBtn: "Close",
+            detayBaslik: "🔍 Order Inspection Point",
+            detayAciklama: "Carefully inspect the plate before going to the customer:",
+            servisEtBtn: "✅ Serve to Customer",
+            solTezgah: "⬅️ Left Counter",
+            sagTezgah: "Right Counter ➡️",
+            depoAcBtn: "📦 Material Warehouse",
+            tezgahHazir: "Counter Ready.",
+            pideTaban: "🫓 Pita Bread Base",
+            etPars: "Meat Pieces",
+            salcaSos: "Tomato Paste Sauce",
+            yogurt: "Yogurt",
+            tereyag: "Hot Butter",
+            sossuz: "No Sauce",
+            istiyorIstemiyor: "No Drink",
+            musteriIstem: "Customer Request / Your Plate:",
+            pideEklendi: "Pita bread added to base.",
+            pideBitti: "Pita out of stock! Get from warehouse.",
+            etEklendi: "piece of meat added.",
+            etBitti: "Meat is finished! Get meat from warehouse.",
+            salcaDegisti: "Tomato sauce added/removed.",
+            yogurtDegisti: "Yogurt added/removed.",
+            tereyagDegisti: "Hot butter drizzled!",
+            icecekEklendi: "added to plate.",
+            icecekKaldirildi: "Drink removed.",
+            sinirlendi: "Customer got angry and left! You missed the tip.",
+            harikaServis: "Great service! You earned.",
+            levelAtlandi: "Congratulations! You reached Level",
+            siparişim: "💬 My Order:",
+            konumSol: "Left Counter (Pita & Meat)",
+            konumOrta: "Middle Counter (Sauces & Drinks)",
+            konumSag: "Right Counter (Side Dishes)",
+            aktifKonum: "Active Location:"
+        },
+        zh: {
+            sayfaBaslik: "伊斯坎德尔模拟器 Pro - 招牌与至尊版",
+            misafir: "访客",
+            tabelaYok: "无招牌",
+            menu: "📜 菜单",
+            musteri: "顾客",
+            gorevBaslik: "任务:",
+            servisYapGorev: "完成 3 次服务",
+            sabir: "耐心",
+            dilSecBaslik: "🌍 语言与地区选择",
+            dilSecAciklama: "为您的店铺招牌和系统语言选择语言：",
+            modSecBaslik: "🎮 选择设备类型",
+            modSecAciklama: "选择您的设备以获得最佳体验：",
+            mobilBtn: "📱 手机 / 平板",
+            masaustuBtn: "💻 桌面 / 电脑",
+            hesapSecBaslik: "👤 账户操作",
+            hesapSecAciklama: "您想如何继续您的店铺？",
+            girisYapBtn: "🔑 登录",
+            kayitOlBtn: "📝 注册",
+            girisBaslik: "🔑 店铺登录",
+            kayitBaslik: "📝 新店注册",
+            kullaniciPlaceholder: "您的用户名",
+            sifrePlaceholder: "您的密码",
+            devamEtBtn: "继续",
+            kayitBaslaBtn: "注册并开始",
+            geriDonBtn: "🔙 返回",
+            tabelaBaslik: "✨ 设计你店铺的王者招牌",
+            tabelaAciklama: "经商的第一法则就是一个引人注目的招牌，兄弟！",
+            tabelaYaziLabel: "招牌文字 (Arial):",
+            tabelaStilLabel: "背景风格：",
+            tabelaRenkLabel: "文字颜色：",
+            tabelaAsBtn: "挂上招牌并进入店铺 🚀",
+            ogreticiBaslik: "🎓 大师对学徒的指导",
+            adim1B: "第一步：皮塔饼",
+            adim1P: "首先，从柜台选择皮塔饼并把它加到盘子里！",
+            adim2B: "第二步：切肉",
+            adim2P: "向右转，从柜台切出美味的肉并铺满盘子！",
+            adim3B: "第三步：酱料与冷饮",
+            adim3P: "别忘了根据订单添加番茄酱、黄油、酸奶以及冷饮！",
+            adim4B: "第四步：建筑与等级",
+            adim4P: "刷经验升级！从店铺升级菜单更改墙面涂料。",
+            adim5B: "第五步：服务时间",
+            adim5P: "点击盘子进入详细界面，检查并服务顾客！",
+            ileriBtn: "下一步 ➡️",
+            geriBtn: "返回",
+            oyunaBaslaBtn: "开始游戏 🚀",
+            menuBaslik: "📜 店铺菜单与食谱",
+            kapatBtn: "关闭",
+            detayBaslik: "🔍 订单检查点",
+            detayAciklama: "去找顾客之前仔细检查盘子：",
+            servisEtBtn: "✅ 服务顾客",
+            solTezgah: "⬅️ 左侧柜台",
+            sagTezgah: "右侧柜台 ➡️",
+            depoAcBtn: "📦 材料仓库",
+            tezgahHazir: "柜台准备就绪。",
+            pideTaban: "🫓 皮塔饼底",
+            etPars: "肉块",
+            salcaSos: "番茄酱",
+            yogurt: "酸奶",
+            tereyag: "热黄油",
+            sossuz: "无酱料",
+            istiyorIstemiyor: "不需要饮料",
+            musteriIstem: "顾客要求 / 你的盘子：",
+            pideEklendi: "皮塔饼底已添加。",
+            pideBitti: "皮塔饼已售罄！从仓库拿取。",
+            etEklendi: "块肉已添加。",
+            etBitti: "肉用完了！从仓库拿肉。",
+            salcaDegisti: "番茄酱已添加/移除。",
+            yogurtDegisti: "酸奶已添加/移除。",
+            tereyagDegisti: "热黄油已浇上！",
+            icecekEklendi: "已添加到盘子。",
+            icecekKaldirildi: "饮料已移除。",
+            sinirlendi: "顾客生气并离开了！你错过了小费。",
+            harikaServis: "出色的服务！你赚取了",
+            levelAtlandi: "恭喜！你达到了等级",
+            siparişim: "💬 我的订单：",
+            konumSol: "左侧柜台 (皮塔与肉)",
+            konumOrta: "中间柜台 (酱料与饮料)",
+            konumSag: "右侧柜台 (小菜)",
+            aktifKonum: "当前位置："
+        },
+        hi: {
+            sayfaBaslik: "iskender Simulator Pro - साइन & अल्ट्रा संस्करण",
+            misafir: "अतिथि",
+            tabelaYok: "कोई साइन नहीं",
+            menu: "📜 मेनू",
+            musteri: "ग्राहक",
+            gorevBaslik: "मिशन:",
+            servisYapGorev: "3 ऑर्डर परोसें",
+            sabir: "धैर्य",
+            dilSecBaslik: "🌍 भाषा और क्षेत्र का चयन",
+            dilSecAciklama: "अपनी दुकान के साइन और सिस्टम भाषा के लिए भाषा चुनें:",
+            modSecBaslik: "🎮 डिवाइस प्रकार चुनें",
+            modSecAciklama: "सर्वोत्तम अनुभव के लिए अपना डिवाइस चुनें:",
+            mobilBtn: "📱 मोबाइल / टैबलेट",
+            masaustuBtn: "💻 डेस्कटॉप / कंप्यूटर",
+            hesapSecBaslik: "👤 खाता क्रिया",
+            hesapSecAciklama: "अपनी दुकान पर जारी रखने के लिए आप क्या करना चाहते हैं?",
+            girisYapBtn: "🔑 लॉगिन करें",
+            kayitOlBtn: "📝 रजिस्टर करें",
+            girisBaslik: "🔑 दुकान लॉगिन",
+            kayitBaslik: "📝 नई दुकान पंजीकरण",
+            kullaniciPlaceholder: "आपका उपयोगकर्ता नाम",
+            sifrePlaceholder: "आपका पासवर्ड",
+            devamEtBtn: "जारी रखें",
+            kayitBaslaBtn: "रजिस्टर करें और शुरू करें",
+            geriDonBtn: "🔙 वापस जाएं",
+            tabelaBaslik: "✨ अपनी दुकान का राजा साइन डिज़ाइन करें",
+            tabelaAciklama: "व्यापार का पहला नियम एक आकर्षक साइन है, भाई!",
+            tabelaYaziLabel: "साइन टेक्स्ट (Arial):",
+            tabelaStilLabel: "पृष्ठभूमि शैली:",
+            tabelaRenkLabel: "टेक्स्ट रंग:",
+            tabelaAsBtn: "साइन लटकाएं और दुकान में प्रवेश करें 🚀",
+            ogreticiBaslik: "🎓 प्रशिक्षु के लिए मास्टर का मार्गदर्शन",
+            adim1B: "चरण 1: पिटा ब्रेड",
+            adim1P: "पहले काउंटर से पिटा ब्रेड चुनें और इसे थाली में जोड़ें!",
+            adim2B: "चरण 2: मांस काटना",
+            adim2P: "दाएं मुड़ें, काउंटर से स्वादिष्ट मांस काटें और थाली भरें!",
+            adim3B: "चरण 3: सॉस और ठंडे पेय",
+            adim3P: "ऑर्डर के अनुसार पेस्ट, मक्खन, दही और निश्चित रूप से ठंडे पेय जोड़ना न भूलें!",
+            adim4B: "चरण 4: वास्तुकला और स्तर",
+            adim4P: "लेवल अप करने के लिए XP ग्राइंड करें! दुकान अपग्रेड मेनू से दीवार का रंग बदलें।",
+            adim5B: "चरण 5: परोसने का समय",
+            adim5P: "विस्तृत दृश्य खोलने के लिए थाली पर क्लिक करें, जांचें और ग्राहक को परोसें!",
+            ileriBtn: "आगे ➡️",
+            geriBtn: "वापस",
+            oyunaBaslaBtn: "गेम शुरू करें 🚀",
+            menuBaslik: "📜 दुकान मेनू और व्यंजन",
+            kapatBtn: "बंद करें",
+            detayBaslik: "🔍 ऑर्डर निरीक्षण बिंदु",
+            detayAciklama: "ग्राहक के पास जाने से पहले थाली का ध्यानपूर्वक निरीक्षण करें:",
+            servisEtBtn: "✅ ग्राहक को परोसें",
+            solTezgah: "⬅️ बायां काउंटर",
+            sagTezgah: "दायां काउंटर ➡️",
+            depoAcBtn: "📦 सामग्री गोदाम",
+            tezgahHazir: "काउंटर तैयार है।",
+            pideTaban: "🫓 पिटा ब्रेड बेस",
+            etPars: "मांस के टुकड़े",
+            salcaSos: "टमाटर पेस्ट सॉस",
+            yogurt: "दही",
+            tereyag: "गर्म मक्खन",
+            sossuz: "बिना सॉस के",
+            istiyorIstemiyor: "कोई पेय नहीं",
+            musteriIstem: "ग्राहक अनुरोध / आपकी थाली:",
+            pideEklendi: "पिटा ब्रेड बेस में जोड़ा गया।",
+            pideBitti: "पिटा स्टॉक में नहीं है! गोदाम से लाएं।",
+            etEklendi: "मांस का टुकड़ा जोड़ा गया।",
+            etBitti: "मांस समाप्त हो गया! गोदाम से मांस लाएं।",
+            salcaDegisti: "टमाटर सॉस जोड़ा/हटाया गया।",
+            yogurtDegisti: "दही जोड़ा/हटाया गया।",
+            tereyagDegisti: "गर्म मक्खन छिड़का गया!",
+            icecekEklendi: "थाली में जोड़ा गया।",
+            icecekKaldirildi: "पेय हटा दिया गया।",
+            sinirlendi: "ग्राहक गुस्सा होकर चला गया! आप टिप से चूक गए।",
+            harikaServis: "शानदार सेवा! आपने कमाए",
+            levelAtlandi: "बधाई हो! आप स्तर पर पहुंच गए",
+            siparişim: "💬 मेरा ऑर्डर:",
+            konumSol: "बायां काउंटर (पिटा और मांस)",
+            konumOrta: "मध्य काउंटर (सॉस और पेय)",
+            konumSag: "दायां काउंटर (साइड डिश)",
+            aktifKonum: "सक्रिय स्थान:"
+        },
+        es: {
+            sayfaBaslik: "İskender Simulator Pro - Letrero y Edición Ultra",
+            misafir: "Invitado",
+            tabelaYok: "Sin letrero",
+            menu: "📜 Menú",
+            musteri: "Cliente",
+            gorevBaslik: "Misión:",
+            servisYapGorev: "Servir 3 pedidos",
+            sabir: "Paciencia",
+            dilSecBaslik: "🌍 Selección de Idioma y Región",
+            dilSecAciklama: "Selecciona el idioma para el letrero de tu tienda y el sistema:",
+            modSecBaslik: "🎮 Seleccionar Tipo de Dispositivo",
+            modSecAciklama: "Selecciona tu dispositivo para la mejor experiencia:",
+            mobilBtn: "📱 Móvil / Tablet",
+            masaustuBtn: "💻 Escritorio / Computadora",
+            hesapSecBaslik: "👤 Acción de Cuenta",
+            hesapSecAciklama: "¿Qué te gustaría hacer para continuar en tu tienda?",
+            girisYapBtn: "🔑 Iniciar Sesión",
+            kayitOlBtn: "📝 Registrarse",
+            girisBaslik: "🔑 Inicio de Sesión",
+            kayitBaslik: "📝 Nuevo Registro de Tienda",
+            kullaniciPlaceholder: "Tu Nombre de Usuario",
+            sifrePlaceholder: "Tu Contraseña",
+            devamEtBtn: "Continuar",
+            kayitBaslaBtn: "Registrarse y Empezar",
+            geriDonBtn: "🔙 Volver",
+            tabelaBaslik: "✨ Diseña el letrero de tu tienda",
+            tabelaAciklama: "¡La primera regla del comercio es un letrero llamativo, amigo!",
+            tabelaYaziLabel: "Texto del letrero (Arial):",
+            tabelaStilLabel: "Estilo de fondo:",
+            tabelaRenkLabel: "Color de texto:",
+            tabelaAsBtn: "Colgar letrero y entrar a la tienda 🚀",
+            ogreticiBaslik: "🎓 Guía del Maestro para el Aprendiz",
+            adim1B: "Paso 1: Pan de Pita",
+            adim1P: "¡Primero selecciona pan de pita de los mostradores y añádelo al plato!",
+            adim2B: "Paso 2: Corte de Carne",
+            adim2P: "¡Gira a la derecha, corta deliciosa carne del mostrador y llena el plato!",
+            adim3B: "Paso 3: Salsas y Bebidas Frías",
+            adim3P: "¡No olvides añadir pasta, mantequilla, yogur y bebidas frías según el pedido!",
+            adim4B: "Paso 4: Arquitectura y Nivel",
+            adim4P: "¡Consigue XP para subir de nivel! Cambia la pintura de la pared en Mejoras.",
+            adim5B: "Paso 5: Hora de Servir",
+            adim5P: "¡Haz clic en el plato para ver los detalles, revísalo y sírvelo al cliente!",
+            ileriBtn: "Siguiente ➡️",
+            geriBtn: "Atrás",
+            oyunaBaslaBtn: "Empezar Juego 🚀",
+            menuBaslik: "📜 MENÚ Y RECETAS",
+            kapatBtn: "Cerrar",
+            detayBaslik: "🔍 Punto de Control de Pedidos",
+            detayAciklama: "Inspecciona cuidadosamente el plato antes de ir con el cliente:",
+            servisEtBtn: "✅ Servir al Cliente",
+            solTezgah: "⬅️ Mostrador Izquierdo",
+            sagTezgah: "Mostrador Derecho ➡️",
+            depoAcBtn: "📦 Almacén de Materiales",
+            tezgahHazir: "Mostrador listo.",
+            pideTaban: "🫓 Base de Pan de Pita",
+            etPars: "Trozo(s) de Carne",
+            salcaSos: "Salsa de Tomate",
+            yogurt: "Yogur",
+            tereyag: "Mantequilla Caliente",
+            sossuz: "Sin Salsa",
+            istiyorIstemiyor: "Sin Bebida",
+            musteriIstem: "Pedido del Cliente / Tu Plato:",
+            pideEklendi: "Pan de pita añadido a la base.",
+            pideBitti: "¡No hay pita! Cómprala en el almacén.",
+            etEklendi: "trozo(s) de carne añadido(s).",
+            etBitti: "¡Se acabó la carne! Cómprala en el almacén.",
+            salcaDegisti: "Salsa de tomate añadida/removida.",
+            yogurtDegisti: "Yogur añadido/removido.",
+            tereyagDegisti: "¡Mantequilla caliente añadida!",
+            icecekEklendi: "añadido al plato.",
+            icecekKaldirildi: "Bebida retirada.",
+            sinirlendi: "¡El cliente se enojó y se fue! Perdiste la propina.",
+            harikaServis: "¡Excelente servicio! Ganaste",
+            levelAtlandi: "¡Felicidades! ¡Alcanzaste el nivel",
+            siparişim: "💬 Mi Pedido:",
+            konumSol: "Mostrador Izquierdo (Pita y Carne)",
+            konumOrta: "Mostrador Central (Salsas y Bebidas)",
+            konumSag: "Mostrador Derecho (Acompañamientos)",
+            aktifKonum: "Ubicación Activa:"
+        },
+        fr: {
+            sayfaBaslik: "İskender Simulator Pro - Enseigne & Édition Ultra",
+            misafir: "Invité",
+            tabelaYok: "Pas d'enseigne",
+            menu: "📜 Menu",
+            musteri: "Client",
+            gorevBaslik: "Quête :",
+            servisYapGorev: "Servir 3 commandes",
+            sabir: "Patience",
+            dilSecBaslik: "🌍 Sélection de la Langue & Région",
+            dilSecAciklama: "Sélectionnez la langue pour l'enseigne de votre boutique et le système :",
+            modSecBaslik: "🎮 Sélectionner le Type d'Appareil",
+            modSecAciklama: "Sélectionnez votre appareil pour la meilleure expérience :",
+            mobilBtn: "📱 Mobile / Tablette",
+            masaustuBtn: "💻 Ordinateur de Bureau",
+            hesapSecBaslik: "👤 Action sur le Compte",
+            hesapSecAciklama: "Que souhaitez-vous faire pour continuer dans votre boutique ?",
+            girisYapBtn: "🔑 Connexion",
+            kayitOlBtn: "📝 S'inscrire",
+            girisBaslik: "🔑 Connexion Boutique",
+            kayitBaslik: "📝 Inscription Nouvelle Boutique",
+            kullaniciPlaceholder: "Votre Nom d'Utilisateur",
+            sifrePlaceholder: "Votre Mot de Passe",
+            devamEtBtn: "Continuer",
+            kayitBaslaBtn: "S'inscrire et Commencer",
+            geriDonBtn: "🔙 Retour",
+            tabelaBaslik: "✨ Concevez l'Enseigne Royale de votre Boutique",
+            tabelaAciklama: "La première règle du commerce est une enseigne accrocheuse, mon ami !",
+            tabelaYaziLabel: "Texte de l'enseigne (Arial) :",
+            tabelaStilLabel: "Style d'arrière-plan :",
+            tabelaRenkLabel: "Couleur du texte :",
+            tabelaAsBtn: "Accrocher l'enseigne et entrer 🚀",
+            ogreticiBaslik: "🎓 Guide du Maître pour l'Apprenti",
+            adim1B: "Étape 1 : Pain Pita",
+            adim1P: "D'abord, sélectionnez le pain pita dans les comptoirs et ajoutez-le à l'assiette !",
+            adim2B: "Étape 2 : Découpe de Viande",
+            adim2P: "Tournez à droite, découpez de la viande délicieuse et garnissez l'assiette !",
+            adim3B: "Étape 3 : Sauces & Boissons Froides",
+            adim3P: "N'oubliez pas d'ajouter la sauce tomate, le beurre, le yaourt et les boissons froides !",
+            adim4B: "Étape 4 : Architecture & Niveau",
+            adim4P: "Gagnez de l'XP pour monter de niveau ! Changez la peinture murale dans le menu.",
+            adim5B: "Étape 5 : Heure du Service",
+            adim5P: "Cliquez sur l'assiette pour voir les détails, vérifiez et servez le client !",
+            ileriBtn: "Suivant ➡️",
+            geriBtn: "Retour",
+            oyunaBaslaBtn: "Commencer le Jeu 🚀",
+            menuBaslik: "📜 MENU DE LA BOUTIQUE & RECETTES",
+            kapatBtn: "Fermer",
+            detayBaslik: "🔍 Point de Contrôle des Commandes",
+            detayAciklama: "Inspectez attentivement l'assiette avant d'aller voir le client :",
+            servisEtBtn: "✅ Servir au Client",
+            solTezgah: "⬅️ Comptoir Gauche",
+            sagTezgah: "Comptoir Droit ➡️",
+            depoAcBtn: "📦 Entrepôt de Matériaux",
+            tezgahHazir: "Comptoir prêt.",
+            pideTaban: "🫓 Base de Pain Pita",
+            etPars: "Morceau(x) de Viande",
+            salcaSos: "Sauce Tomate",
+            yogurt: "Yaourt",
+            tereyag: "Beurre Fondu Chaud",
+            sossuz: "Sans Sauce",
+            istiyorIstemiyor: "Pas de Boisson",
+            musteriIstem: "Demande du Client / Votre Assiette :",
+            pideEklendi: "Pain pita ajouté à la base.",
+            pideBitti: "Pita épuisée ! Achetez-en à l'entrepôt.",
+            etEklendi: "morceau(x) de viande ajouté(s).",
+            etBitti: "La viande est finie ! Achetez-en à l'entrepôt.",
+            salcaDegisti: "Sauce tomate ajoutée/retirée.",
+            yogurtDegisti: "Yaourt ajouté/retiré.",
+            tereyagDegisti: "Beurre chaud versé !",
+            icecekEklendi: "ajouté à l'assiette.",
+            icecekKaldirildi: "Boisson retirée.",
+            sinirlendi: "Le client s'est énervé et est parti ! Vous avez raté le pourboire.",
+            harikaServis: "Superbe service ! Vous avez gagné",
+            levelAtlandi: "Félicitations ! Vous avez atteint le niveau",
+            siparişim: "💬 Ma Commande :",
+            konumSol: "Comptoir Gauche (Pita & Viande)",
+            konumOrta: "Comptoir Central (Sauces & Boissons)",
+            konumSag: "Comptoir Droit (Accompagnements)",
+            aktifKonum: "Emplacement Actif :"
+        }
+    };
+
+    function metinGetir(anahtar) {
+        if(dilSozlugu[secilenDil] && dilSozlugu[secilenDil][anahtar]) {
+            return dilSozlugu[secilenDil][anahtar];
+        }
+        return dilSozlugu['tr'][anahtar] || anahtar;
+    }
+
+    function arayuzDilleriniGuncelle() {
+        document.getElementById('html-kok').setAttribute('lang', secilenDil);
+        document.getElementById('sayfa-baslik').innerText = metinGetir('sayfaBaslik');
+        document.getElementById('lbl-kullanici').innerText = aktifKullanici || metinGetir('misafir');
+        document.getElementById('lbl-tabela').innerText = tabelaData.askida ? tabelaData.yazi : metinGetir('tabelaYok');
+        document.getElementById('kasa').innerText = kasa;
+        document.getElementById('btn-menu-txt').innerText = metinGetir('menu');
+        document.getElementById('lbl-musteri-etiket').innerText = metinGetir('musteri');
+        document.getElementById('lbl-gorev-baslik').innerText = metinGetir('gorevBaslik');
+        
+        let aktifG = gorevler[aktifGorevIdx];
+        if(aktifG) {
+            if(aktifGorevIdx === 0) document.getElementById('gorev-tanim').innerText = metinGetir('servisYapGorev');
+            else document.getElementById('gorev-tanim').innerText = aktifG.tanim;
+        }
+
+        document.getElementById('lbl-sabir-metin').innerText = metinGetir('sabir');
+        document.getElementById('dil-secim-baslik').innerText = metinGetir('dilSecBaslik');
+        document.getElementById('dil-secim-aciklama').innerText = metinGetir('dilSecAciklama');
+        document.getElementById('mod-secim-baslik').innerText = metinGetir('modSecBaslik');
+        document.getElementById('mod-secim-aciklama').innerText = metinGetir('modSecAciklama');
+        document.getElementById('btn-mobil-txt').innerText = metinGetir('mobilBtn');
+        document.getElementById('btn-masaustu-txt').innerText = metinGetir('masaustuBtn');
+        document.getElementById('hesap-secim-baslik').innerText = metinGetir('hesapSecBaslik');
+        document.getElementById('hesap-secim-aciklama').innerText = metinGetir('hesapSecAciklama');
+        document.getElementById('btn-giris-sec-txt').innerText = metinGetir('girisYapBtn');
+        document.getElementById('btn-kayit-sec-txt').innerText = metinGetir('kayitOlBtn');
+
+        document.getElementById('form-baslik').innerText = islemTipi === 'giris' ? metinGetir('girisBaslik') : metinGetir('kayitBaslik');
+        document.getElementById('txt-kullanici-adi').placeholder = metinGetir('kullaniciPlaceholder');
+        document.getElementById('txt-sifre').placeholder = metinGetir('sifrePlaceholder');
+        document.getElementById('btn-islem-yap').innerText = islemTipi === 'giris' ? metinGetir('devamEtBtn') : metinGetir('kayitBaslaBtn');
+        document.getElementById('btn-geri-don-txt').innerText = metinGetir('geriDonBtn');
+
+        document.getElementById('tabela-baslik').innerText = metinGetir('tabelaBaslik');
+        document.getElementById('tabela-aciklama').innerText = metinGetir('tabelaAciklama');
+        document.getElementById('lbl-tabela-yazi').innerText = metinGetir('tabelaYaziLabel');
+        document.getElementById('lbl-tabela-stil').innerText = metinGetir('tabelaStilLabel');
+        document.getElementById('lbl-tabela-renk').innerText = metinGetir('tabelaRenkLabel');
+        document.getElementById('btn-tabela-as-txt').innerText = metinGetir('tabelaAsBtn');
+
+        document.getElementById('ogretici-ana-baslik').innerText = metinGetir('ogreticiBaslik');
+        document.getElementById('t-s1-b').innerText = metinGetir('adim1B');
+        document.getElementById('t-s1-p').innerText = metinGetir('adim1P');
+        document.getElementById('t-s2-b').innerText = metinGetir('adim2B');
+        document.getElementById('t-s2-p').innerText = metinGetir('adim2P');
+        document.getElementById('t-s3-b').innerText = metinGetir('adim3B');
+        document.getElementById('t-s3-p').innerText = metinGetir('adim3P');
+        document.getElementById('t-s4-b').innerText = metinGetir('adim4B');
+        document.getElementById('t-s4-p').innerText = metinGetir('adim4P');
+        document.getElementById('t-s5-b').innerText = metinGetir('adim5B');
+        document.getElementById('t-s5-p').innerText = metinGetir('adim5P');
+        document.getElementById('btn-geri-adim').innerText = metinGetir('geriBtn');
+        guncelleOgreticiAdimButonMetni();
+
+        document.getElementById('menu-baslik-txt').innerText = metinGetir('menuBaslik');
+        document.getElementById('btn-menu-kapat-txt').innerText = metinGetir('kapatBtn');
+        document.getElementById('detay-baslik-txt').innerText = metinGetir('detayBaslik');
+        document.getElementById('detay-aciklama-txt').innerText = metinGetir('detayAciklama');
+        document.getElementById('btn-servis-et-txt').innerText = metinGetir('servisEtBtn');
+        document.getElementById('btn-detay-geri-txt').innerText = metinGetir('geriDonBtn');
+
+        document.getElementById('btn-sol-tezgah-txt').innerText = metinGetir('solTezgah');
+        document.getElementById('btn-sag-tezgah-txt').innerText = metinGetir('sagTezgah');
+        document.getElementById('btn-depo-ac-txt').innerText = metinGetir('depoAcBtn');
+        durumYaz(metinGetir('tezgahHazir'));
+    }
+
+    function guncelleOgreticiAdimButonMetni() {
+        let btn = document.getElementById('btn-ileri-adim');
+        if(btn) {
+            btn.innerText = ogreticiAdim === toplamAdim - 1 ? metinGetir('oyunaBaslaBtn') : metinGetir('ileriBtn');
+        }
+    }
+
+    function dilSec(secilenKod) {
+        secilenDil = secilenKod;
+        arayuzDilleriniGuncelle();
+        document.getElementById('secilen-dil-bilgi').innerHTML = `<b>Dil başarıyla değiştirildi!</b>`;
+        setTimeout(() => {
+            document.getElementById('dil-overlay').style.display = 'none';
+            document.getElementById('mod-overlay').style.display = 'flex';
+        }, 400);
+    }
+
+    let kasa = 150;
+    let level = 1;
+    let xp = 0;
+    let xpSinir = 300;
+    let aktifYon = 0; 
+    let oyunDurdu = false;
+    let secilenMod = 'masaustu';
+    let aktifKullanici = "";
+    let islemTipi = 'giris';
+
+    let tabelaData = { yazi: "İskender Diyarım", arkaplan: "#7f1d1d", renk: "#facc15", askida: false };
+    let dukkanGelistirme = { masaLvl: 1, dekorLvl: 1, duvarBoyaIdx: 0 };
+    let duvarBoyalari = [
+        { isim: "Klasik Taş", renk: "#1e293b" },
+        { isim: "Bursa Tuğlası", renk: "#450a0a" },
+        { isim: "Lüks Antrasit", renk: "#09090b" },
+        { isim: "Osmanlı Yeşili", renk: "#064e3b" }
+    ];
+
+    let stok = { pide: 15, et: 25, salca: 15, yogurt: 15, tereyag: 15, icecekler: { cola: 10, icedtea: 10, gazoz: 10, ayran: 10, salgam: 10 }, yanEkstralar: { tursu: 5, patates: 5, baklava: 5, kunefe: 5, kazandibi: 5 } };
+    let FIYATLAR = { pide: 20, etParca: 50, salca: 20, tereyag: 30, yogurt: 20, cola: 25, icedtea: 25, gazoz: 20, ayran: 15, salgam: 20 };
+
+    let siparis = { pide: false, et: 0, salca: false, yogurt: false, tereyag: false, icecek: null, tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false };
+    let hedefSiparis = { pide: true, et: 3, salca: true, yogurt: true, tereyag: true, icecek: 'ayran', tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false };
+    let musteriSayisi = 1;
+    let sabirSuresi = 30;
+    let kalanSabir = 30;
+    let sabirTimer = null;
+
+    let gorevler = [
+        { id: 1, tanim: "3 Servis Yap", hedef: 3, ilerleme: 0, odul: 100 },
+        { id: 2, tanim: "5 Etli İskender Yap", hedef: 5, ilerleme: 0, odul: 250 },
+        { id: 3, tanim: "2000 ₺ Kasaya Ulaş", hedef: 2000, ilerleme: 150, odul: 500 }
+    ];
+    let aktifGorevIdx = 0;
+
+    let ogreticiAdim = 0;
+    const toplamAdim = 5;
+
+    const canvas = document.getElementById("oyunCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function modSec(mod) {
+        secilenMod = mod;
+        document.getElementById('mod-overlay').style.display = 'none';
+        document.getElementById('secim-overlay').style.display = 'flex';
+    }
+
+    function secimYonlendir(tip) {
+        islemTipi = tip;
+        document.getElementById('secim-overlay').style.display = 'none';
+        document.getElementById('giris-overlay').style.display = 'flex';
+        arayuzDilleriniGuncelle();
+    }
+
+    function geriDonSecim() {
+        document.getElementById('giris-overlay').style.display = 'none';
+        document.getElementById('secim-overlay').style.display = 'flex';
+    }
+
+    function islemYap() {
+        let kAdi = document.getElementById('txt-kullanici-adi').value.trim();
+        if(!kAdi) { alert("Lütfen bir kullanıcı adı girin!"); return; }
+        aktifKullanici = kAdi;
+        arayuzDilleriniGuncelle();
+
+        document.getElementById('giris-overlay').style.display = 'none';
+        
+        if(!tabelaData.askida) {
+            document.getElementById('tabela-overlay').style.display = 'flex';
+            tabelaGuncelleIzle();
+        } else {
+            oyunuBaslatOpsiyonel();
+        }
+    }
+
+    function tabelaGuncelleIzle() {
+        let yazi = document.getElementById('tabela-input-yazi').value || "İskender Diyarım";
+        let arka = document.getElementById('tabela-arkaplan').value;
+        let renk = document.getElementById('tabela-renk').value;
+
+        let onizleme = document.getElementById('tabela-onizleme');
+        onizleme.style.backgroundColor = arka;
+        
+        let span = document.getElementById('tabela-onizleme-yazi');
+        span.innerText = yazi;
+        span.style.color = renk;
+    }
+
+    function tabelayiAsSurucu() {
+        let yazi = document.getElementById('tabela-input-yazi').value || "İskender Diyarım";
+        let arka = document.getElementById('tabela-arkaplan').value;
+        let renk = document.getElementById('tabela-renk').value;
+
+        tabelaData = { yazi: yazi, arkaplan: arka, renk: renk, askida: true };
+        document.getElementById('lbl-tabela').innerText = yazi;
+
+        document.getElementById('tabela-overlay').style.display = 'none';
+        oyunuBaslatOpsiyonel();
+    }
+
+    function oyunuBaslatOpsiyonel() {
+        let kayitliOgretici = localStorage.getItem('iskender_ogretici_bitti');
+        if(!kayitliOgretici) {
+            document.getElementById('ogretici-overlay').style.display = 'flex';
+            guncelleOgreticiAdim();
+        } else {
+            oyunDurdu = false;
+            yeniMusteriGetir();
+            oyunDongusuBaslat();
+        }
+    }
+
+    function adimDegistir(yon) {
+        ogreticiAdim += yon;
+        if(ogreticiAdim >= toplamAdim) {
+            document.getElementById('ogretici-overlay').style.display = 'none';
+            localStorage.setItem('iskender_ogretici_bitti', 'true');
+            oyunDurdu = false;
+            yeniMusteriGetir();
+            oyunDongusuBaslat();
+            return;
+        }
+        if(ogreticiAdim < 0) ogreticiAdim = 0;
+        guncelleOgreticiAdim();
+    }
+
+    function guncelleOgreticiAdim() {
+        for(let i=0; i<toplamAdim; i++) {
+            let stepEl = document.getElementById(`step-${i}`);
+            let dotEl = document.getElementById(`dot-${i}`);
+            if(stepEl) stepEl.classList.remove('active');
+            if(dotEl) dotEl.classList.remove('active');
+        }
+        let activeStep = document.getElementById(`step-${ogreticiAdim}`);
+        let activeDot = document.getElementById(`dot-${ogreticiAdim}`);
+        if(activeStep) activeStep.classList.add('active');
+        if(activeDot) activeDot.classList.add('active');
+
+        let geriBtn = document.getElementById('btn-geri-adim');
+        if(geriBtn) geriBtn.style.display = ogreticiAdim > 0 ? 'block' : 'none';
+        guncelleOgreticiAdimButonMetni();
+    }
+
+    function menuAcKapat() {
+        let m = document.getElementById('menu-overlay');
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function depoAc() {
+        stokPaneliGuncelle();
+        document.getElementById('depo-overlay').style.display = 'flex';
+        oyunDurdu = true;
+    }
+
+    function stokPaneliGuncelle() {
+        let html = `🫓 Pide: ${stok.pide} | 🥩 Et: ${stok.et} | 🍅 Salça: ${stok.salca} | 🥛 Yoğurt: ${stok.yogurt} | 🧈 Tereyağ: ${stok.tereyag}<br>`;
+        html += `🧊 İçecekler: Cola(${stok.icecekler.cola}), IcedTea(${stok.icecekler.icedtea}), Gazoz(${stok.icecekler.gazoz}), Ayran(${stok.icecekler.ayran}), Şalgam(${stok.icecekler.salgam})`;
+        let depoPanel = document.getElementById('stok-paneli');
+        if(depoPanel) depoPanel.innerHTML = html;
+    }
+
+    function oyunuKaydet() {
+        let veri = { kasa, level, xp, aktifKullanici, tabelaData, dukkanGelistirme, stok, musteriSayisi, secilenDil };
+        localStorage.setItem('iskender_pro_save', JSON.stringify(veri));
+        alert("Oyun başarıyla kaydedildi!");
+    }
+
+    function oyunuYenidenBaslat() {
+        if(confirm("Tüm dükkan sıfırlanacak. Emin misin?")) {
+            localStorage.removeItem('iskender_pro_save');
+            localStorage.removeItem('iskender_ogretici_bitti');
+            location.reload();
+        }
+    }
+
+    function oyunDuraklatAc() {
+        oyunDurdu = !oyunDurdu;
+        durumYaz(oyunDurdu ? "Oyun duraklatıldı." : "Oyun devam ediyor.");
+    }
+
+    function tamEkranGec() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    function cikisYap() {
+        if(confirm("Giriş ekranına dönmek istiyor musun?")) {
+            location.reload();
+        }
+    }
+
+    function yonDegis(yon) {
+        aktifYon += yon;
+        if(aktifYon < 0) aktifYon = 2;
+        if(aktifYon > 2) aktifYon = 0;
+
+        let yonler = [metinGetir('konumSol'), metinGetir('konumOrta'), metinGetir('konumSag')];
+        durumYaz(`${metinGetir('aktifKonum')} ${yonler[aktifYon]}`);
+    }
+
+    function durumYaz(mesaj) {
+        let d = document.getElementById('durum');
+        if(d) d.innerText = mesaj;
+    }
+
+    function kasaGuncelle() {
+        document.getElementById('kasa').innerText = kasa;
+        gorevKontrol('kasa', kasa);
+    }
+
+    function yeniMusteriGetir() {
+        siparis = { pide: false, et: 0, salca: false, yogurt: false, tereyag: false, icecek: null, tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false };
+        
+        let rastgeleEt = Math.floor(Math.random() * 3) + 2; 
+        let iceceklerList = ['cola', 'icedtea', 'gazoz', 'ayran', 'salgam'];
+        let rastgeleIcecek = iceceklerList[Math.floor(Math.random() * iceceklerList.length)];
+
+        hedefSiparis = {
+            pide: true,
+            et: rastgeleEt,
+            salca: Math.random() > 0.3,
+            yogurt: Math.random() > 0.3,
+            tereyag: Math.random() > 0.4,
+            icecek: rastgeleIcecek,
+            tursu: false, patates: false, baklava: false, kunefe: false, kazandibi: false
+        };
+
+        kalanSabir = sabirSuresi;
+        barGuncelle();
+        if(sabirTimer) clearInterval(sabirTimer);
+        sabirTimer = setInterval(() => {
+            if(!oyunDurdu) {
+                kalanSabir--;
+                barGuncelle();
+                if(kalanSabir <= 0) {
+                    clearInterval(sabirTimer);
+                    durumYaz(metinGetir('sinirlendi'));
+                    setTimeout(yeniMusteriGetir, 2000);
+                }
+            }
+        }, 1000);
+    }
+
+    function barGuncelle() {
+        let yuzde = (kalanSabir / sabirSuresi) * 100;
+        let bar = document.getElementById('sabir-bari');
+        if(bar) bar.style.width = yuzde + "%";
+        let kalanSaniyeEl = document.getElementById('kalan-saniye');
+        if(kalanSaniyeEl) kalanSaniyeEl.innerText = kalanSabir;
+
+        if(bar) {
+            if(yuzde > 50) bar.style.backgroundColor = "#22c55e";
+            else if(yuzde > 20) bar.style.backgroundColor = "#eab308";
+            else bar.style.backgroundColor = "#ef4444";
+        }
+    }
+
+    canvas.addEventListener('click', (e) => {
+        if(oyunDurdu) return;
+        let rect = canvas.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        if(x >= 320 && x <= 480 && y >= 150 && y <= 300) {
+            document.getElementById('detay-icerik').innerHTML = siparisOzetMetinGetir();
+            document.getElementById('detay-overlay').style.display = 'flex';
+            oyunDurdu = true;
+            return;
+        }
+
+        if(aktifYon === 0) {
+            if(x >= 50 && x <= 200 && y >= 250 && y <= 350) {
+                if(stok.pide > 0) {
+                    stok.pide--;
+                    siparis.pide = true;
+                    durumYaz(metinGetir('pideEklendi'));
+                } else {
+                    durumYaz(metinGetir('pideBitti'));
+                }
+            }
+            if(x >= 600 && x <= 750 && y >= 200 && y <= 350) {
+                if(stok.et > 0) {
+                    stok.et--;
+                    siparis.et++;
+                    durumYaz(`${siparis.et} ${metinGetir('etEklendi')}`);
+                } else {
+                    durumYaz(metinGetir('etBitti'));
+                }
+            }
+        } else if(aktifYon === 1) {
+            if(x >= 100 && x <= 220 && y >= 220 && y <= 330) {
+                if(stok.salca > 0) { stok.salca--; siparis.salca = !siparis.salca; durumYaz(metinGetir('salcaDegisti')); }
+            }
+            if(x >= 250 && x <= 370 && y >= 220 && y <= 330) {
+                if(stok.yogurt > 0) { stok.yogurt--; siparis.yogurt = !siparis.yogurt; durumYaz(metinGetir('yogurtDegisti')); }
+            }
+            if(x >= 400 && x <= 520 && y >= 220 && y <= 330) {
+                if(stok.tereyag > 0) { stok.tereyag--; siparis.tereyag = !siparis.tereyag; durumYaz(metinGetir('tereyagDegisti')); }
+            }
+            if(x >= 580 && x <= 720 && y >= 220 && y <= 330) {
+                if(siparis.icecek === null) {
+                    siparis.icecek = hedefSiparis.icecek;
+                    durumYaz(`${icecekIsimCevir(siparis.icecek)} ${metinGetir('icecekEklendi')}`);
+                } else {
+                    siparis.icecek = null;
+                    durumYaz(metinGetir('icecekKaldirildi'));
+                }
+            }
+        }
+    });
+
+    function siparisOzetMetinGetir() {
+        let metin = `<b>${metinGetir('musteriIstem')}</b><br>`;
+        metin += `• Pide: ${siparis.pide ? '✅' : '❌'}<br>`;
+        metin += `• Et Parçası: ${siparis.et} Adet<br>`;
+        metin += `• Salça Sos: ${siparis.salca ? '✅' : '❌'}<br>`;
+        metin += `• Yoğurt: ${siparis.yogurt ? '✅' : '❌'}<br>`;
+        metin += `• Tereyağ: ${siparis.tereyag ? '✅' : '❌'}<br>`;
+        metin += `• İçecek: ${siparis.icecek ? icecekIsimCevir(siparis.icecek) : metinGetir('istiyorIstemiyor')}<br>`;
+        return metin;
+    }
+
+    function icecekIsimCevir(kod) {
+        let harita = { cola: "Cola", icedtea: "IcedTea", gazoz: "Gazoz", ayran: "Ayran", salgam: "Şalgam" };
+        return harita[kod] || kod;
+    }
+
+    function detayKapat() {
+        document.getElementById('detay-overlay').style.display = 'none';
+        oyunDurdu = false;
+    }
+
+    function servisEtOnayla() {
+        detayKapat();
+        clearInterval(sabirTimer);
+
+        let hesaplananTutar = 0;
+        if(siparis.pide) hesaplananTutar += FIYATLAR.pide;
+        hesaplananTutar += siparis.et * FIYATLAR.etParca;
+        if(siparis.salca) hesaplananTutar += FIYATLAR.salca;
+        if(siparis.yogurt) hesaplananTutar += FIYATLAR.yogurt;
+        if(siparis.tereyag) hesaplananTutar += FIYATLAR.tereyag;
+        if(siparis.icecek) hesaplananTutar += FIYATLAR[siparis.icecek];
+
+        kasa += hesaplananTutar;
+        kasaGuncelle();
+        durumYaz(`${metinGetir('harikaServis')} ${hesaplananTutar} ₺!`);
+
+        gorevKontrol('servis', 1);
+        gorevKontrol('et', siparis.et);
+
+        xp += 100;
+        if(xp >= xpSinir) {
+            level++;
+            xp = 0;
+            xpSinir += 150;
+            let lvlEl = document.getElementById('lvl-deger');
+            if(lvlEl) lvlEl.innerText = level;
+            durumYaz(`${metinGetir('levelAtlandi')} ${level}!`);
+        }
+
+        musteriSayisi++;
+        let mSayiEl = document.getElementById('m-sayi');
+        if(mSayiEl) mSayiEl.innerText = musteriSayisi;
+
+        setTimeout(yeniMusteriGetir, 1500);
+    }
+
+    function gorevKontrol(tip, miktar) {
+        let g = gorevler[aktifGorevIdx];
+        if(!g) return;
+
+        if(tip === 'servis' && g.id === 1) {
+            g.ilerleme += miktar;
+            if(g.ilerleme >= g.hedef) gorevTamamla();
+        } else if(tip === 'et' && g.id === 2) {
+            g.ilerleme += miktar;
+            if(g.ilerleme >= g.hedef) gorevTamamla();
+        } else if(tip === 'kasa' && g.id === 3) {
+            g.ilerleme = miktar;
+            if(g.ilerleme >= g.hedef) gorevTamamla();
+        }
+
+        let ilermEl = document.getElementById('gorev-ilerleme');
+        if(ilermEl) ilermEl.innerText = `${g.ilerleme}/${g.hedef}`;
+    }
+
+    function gorevTamamla() {
+        let g = gorevler[aktifGorevIdx];
+        kasa += g.odul;
+        kasaGuncelle();
+        durumYaz(`Görev Tamamlandı! +${g.odul} ₺ ödül.`);
+        
+        aktifGorevIdx++;
+        if(aktifGorevIdx < gorevler.length) {
+            let yeniG = gorevler[aktifGorevIdx];
+            document.getElementById('gorev-tanim').innerText = (aktifGorevIdx === 0) ? metinGetir('servisYapGorev') : yeniG.tanim;
+            document.getElementById('gorev-ilerleme').innerText = `${yeniG.ilerleme}/${yeniG.hedef}`;
+            document.getElementById('gorev-odul').innerText = yeniG.odul;
+        } else {
+            let gKutusu = document.getElementById('gorev-kutusu');
+            if(gKutusu) gKutusu.innerHTML = "<b>Tüm Görevler Bitti! 👑</b>";
+        }
+    }
+
+    function cizimYap() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let boyaRengi = duvarBoyalari[dukkanGelistirme.duvarBoyaIdx].renk;
+        ctx.fillStyle = boyaRengi;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if(tabelaData.askida) {
+            ctx.fillStyle = tabelaData.arkaplan;
+            ctx.fillRect(200, 15, 400, 40);
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(200, 15, 400, 40);
+
+            ctx.fillStyle = tabelaData.renk;
+            ctx.font = "bold 18px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(tabelaData.yazi, 400, 42);
+            ctx.textAlign = "left";
+        }
+
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(300, 140, 200, 160);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(300, 140, 200, 160);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(400, 220, 60, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        if(siparis.pide) {
+            ctx.fillStyle = "#d97706";
+            ctx.beginPath();
+            ctx.ellipse(400, 220, 45, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        if(siparis.et > 0) {
+            ctx.fillStyle = "#78350f";
+            for(let i=0; i<siparis.et; i++) {
+                let ox = 380 + (i % 3) * 12;
+                let oy = 210 + Math.floor(i / 3) * 10;
+                ctx.fillRect(ox, oy, 14, 8);
+            }
+        }
+
+        if(siparis.salca) {
+            ctx.fillStyle = "#dc2626";
+            ctx.fillRect(385, 215, 30, 10);
+        }
+        if(siparis.yogurt) {
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(390, 225, 25, 8);
+        }
+        if(siparis.tereyag) {
+            ctx.fillStyle = "#f59e0b";
+            ctx.fillRect(380, 210, 40, 5);
+        }
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "12px Arial";
+        let konumIsmi = aktifYon === 0 ? metinGetir('solTezgah') : aktifYon === 1 ? metinGetir('menu').replace('📜 ','') : metinGetir('sagTezgah');
+        ctx.fillText(`${metinGetir('aktifKonum')} ${konumIsmi}`, 20, 380);
+
+        if(aktifYon === 0) {
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(30, 250, 150, 80);
+            ctx.fillStyle = "#facc15";
+            ctx.font = "bold 12px Arial";
+            ctx.fillText("🫓 Pita", 45, 280);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(620, 220, 150, 100);
+            ctx.fillStyle = "#facc15";
+            ctx.fillText("🥩 Meat", 640, 250);
+        } else if(aktifYon === 1) {
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(100, 220, 120, 110);
+            ctx.fillStyle = "#facc15";
+            ctx.font = "bold 12px Arial";
+            ctx.fillText("🍅 Sauce", 120, 250);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(250, 220, 120, 110);
+            ctx.fillStyle = "#facc15";
+            ctx.fillText("🥛 Yogurt", 280, 250);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(400, 220, 120, 110);
+            ctx.fillStyle = "#facc15";
+            ctx.fillText("🧈 Butter", 430, 250);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(580, 220, 140, 110);
+            ctx.fillStyle = "#facc15";
+            ctx.fillText("🧊 Drink", 600, 250);
+        }
+
+        let bx = 525;
+        let by = 20;
+        let bw = 265;
+        let bh = 135;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx, by, bw, bh);
+
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 13px Arial";
+        ctx.fillText(metinGetir('siparişim'), bx + 10, by + 20);
+
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "#1e293b";
+        ctx.fillText(`• ${metinGetir('pideTaban')} (${FIYATLAR.pide}₺)`, bx + 10, by + 38);
+
+        let etFiyat = hedefSiparis.et * FIYATLAR.etParca;
+        ctx.fillText(`• ${hedefSiparis.et} ${metinGetir('etPars')} (${etFiyat}₺)`, bx + 10, by + 54);
+
+        let soslarMetin = [];
+        if(hedefSiparis.salca) soslarMetin.push("Salça");
+        if(hedefSiparis.yogurt) soslarMetin.push("Yoğurt");
+        if(hedefSiparis.tereyag) soslarMetin.push("Tereyağ");
+        let sosStr = soslarMetin.length > 0 ? soslarMetin.join(", ") : metinGetir('sossuz');
+        ctx.fillText(`• Sauces: ${sosStr}`, bx + 10, by + 70);
+
+        let icecekStr = hedefSiparis.icecek ? `🧊 ${icecekIsimCevir(hedefSiparis.icecek)} (${FIYATLAR[hedefSiparis.icecek]}₺)` : metinGetir('istiyorIstemiyor');
+        ctx.fillText(`• ${icecekStr}`, bx + 10, by + 86);
+    }
+
+    function oyunDongusuBaslat() {
+        function dongu() {
+            if(!oyunDurdu) {
+                cizimYap();
+            }
+            requestAnimationFrame(dongu);
+        }
+        dongu();
+    }
+</script>
+</body>
+</html>
